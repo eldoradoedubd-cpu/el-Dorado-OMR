@@ -58,7 +58,8 @@ small,.mu{color:var(--mu);font-size:13px}
 <div class="row"><div><label>শিক্ষার্থীর নাম (ফলাফল PDF এর জন্য)</label><input id="stn"></div><div><label>রেজি. নং (OMR থেকে নিজে আসবে)</label><input id="reg" maxlength="7" placeholder="স্বয়ংক্রিয়"></div></div>
 <button id="cam">ক্যামেরা চালু করুন</button><button class="s" id="snap">এখনই স্ক্যান</button>
 <video id="vid" playsinline muted></video>
-<label>অথবা ছবি তুলে স্ক্যান করুন</label><input type="file" id="pic" accept="image/*" capture="environment">
+<label>ছবি তুলে স্ক্যান (ফোনের ক্যামেরা)</label><input type="file" id="pic" accept="image/*" capture="environment">
+<label>আগে তোলা ছবি স্ক্যান (গ্যালারি থেকে; একসাথে একাধিকও বাছা যাবে)</label><input type="file" id="gal" accept="image/*" multiple>
 <details style="margin-top:10px"><summary>ক্যামেরা না চললে: হাতে লিখে এন্ট্রি</summary>
 <label>সেট নং</label><input id="mset" inputmode="numeric" maxlength="6">
 <label>শিক্ষার্থীর উত্তর (ক্রমানুসারে ক খ গ ঘ; ফাঁকা হলে -)</label><textarea id="mans" rows="3" placeholder="কখগঘ-ক…"></textarea>
@@ -227,8 +228,14 @@ $('reg').oninput=$('stn').oninput=()=>last&&show();
 renderList();
 
 const parseAns=t=>[...t.replace(/\s+/g,'')].map(ch=>{const a=aIdx(ch);return a===undefined?-1:a});
-$('pic').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('res').textContent='স্ক্যান হচ্ছে…';await tick();
- try{const im=await createImageBitmap(f);await proc(im,im.width,im.height,false)}catch(x){err('ছবি পড়া যায়নি।')}};
+async function scanFiles(files){files=[...files];const n=files.length;if(!n)return;let ok=0;const bad=[];
+ for(let i=0;i<n;i++){$('res').textContent=`স্ক্যান হচ্ছে… ${i+1}/${n}`;await tick();
+  try{const im=await createImageBitmap(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1))ok++;else bad.push(i+1)}
+  catch(x){bad.push(i+1);if(n==1)err('ছবি পড়া যায়নি।')}}
+ if(n>1){const m=`${n}টি ছবির মধ্যে ${ok}টি স্ক্যান হয়েছে।`+(bad.length?` ব্যর্থ ছবি নং: ${bad.join(', ')} (আরও স্পষ্ট ছবি লাগবে; চার কোণ ও QR দেখা যেতে হবে)।`:'');
+  if(ok)$('res').insertAdjacentHTML('afterbegin',`<p><b>${m}</b> সবগুলোর ফলাফল নিচের তালিকায় জমা হয়েছে; শেষটির বিস্তারিত এখানে।</p>`);else err(m)}}
+$('pic').onchange=e=>{scanFiles(e.target.files);e.target.value=''};
+$('gal').onchange=e=>{scanFiles(e.target.files);e.target.value=''};
 $('mgo').onclick=()=>{const code=$('mset').value.trim(),rec=SETS[code];let ky,fm;
  if(rec){ky=(rec.qs||rec).map(q=>q.a+1).join('');fm=rec.meta&&rec.meta.fm}
  else if($('mkey').value.trim())ky=parseAns($('mkey').value).map(a=>a+1).join('');
