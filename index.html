@@ -45,7 +45,9 @@ small,.mu{color:var(--mu);font-size:13px}
 <div class="row"><div><label>বিষয়</label><input id="sb"></div><div><label>অধ্যায়ের নাম</label><input id="ch"></div></div>
 <div class="row"><div><label>পূর্ণমান</label><select id="fm"></select></div><div><label>সময়</label><select id="tm"></select></div></div>
 <small>প্রতি প্রশ্নের নম্বর = পূর্ণমান ÷ প্রশ্নসংখ্যা (স্ক্যানের সময় স্বয়ংক্রিয়)।</small>
-<label>প্রশ্নপত্রে প্রতি পৃষ্ঠায় কলাম</label><select id="qc"><option value="2">২ কলাম</option><option value="3">৩ কলাম</option><option value="4">৪ কলাম</option></select>
+<label>প্রশ্নপত্রের ১ম ও ২য় পেজে কলাম সংখ্যা</label><select id="qc"></select>
+<label>৩য় পেজ থেকে বাকি সব পেজে কলাম সংখ্যা (এখানে OMR এর জন্য জায়গা ছাড়া হয় না)</label><select id="qc2"></select>
+<label>নেগেটিভ মার্কিং (প্রশ্নপত্রের হেডিংয়ে ছাপা হবে; ফাঁকা রাখলে ছাপা হবে না)</label><input id="ngp" placeholder="যেমন: প্রতি ভুল উত্তরে ০.২৫ নম্বর কাটা যাবে">
 <label>প্রশ্নপত্রের ফন্ট</label><select id="fnt"></select><div id="fprev" style="font-size:17px;margin-top:4px">ক খ গ ঘ — বাংলা প্রশ্নের নমুনা ১২৩</div>
 <label>প্রশ্নের ফন্ট সাইজ</label><select id="fsz"><option value="0">স্বয়ংক্রিয় (কলাম অনুযায়ী)</option><option value="9">৯ (খুব ছোট)</option><option value="10">১০</option><option value="11">১১</option><option value="12">১২</option><option value="13">১৩</option><option value="14">১৪</option><option value="15">১৫</option><option value="16">১৬</option><option value="18">১৮ (বড়)</option></select>
 <label>প্রশ্নপত্রের সংখ্যা (সেট)</label><input type="number" id="cnt" value="5" min="1" max="200">
@@ -82,6 +84,7 @@ const bn=n=>(+n).toLocaleString('bn-BD'),tf=m=>m>=60?(m%60?`${bn(m/60|0)} ঘণ
 [10,15,20,25,30,40,50,60,70,75,80,100,120,150].forEach(v=>$('fm').add(new Option(bn(v),v)));
 [10,15,20,25,30,40,45,50,60,75,90,120,150,180].forEach(v=>$('tm').add(new Option(tf(v),v)));
 $('fm').value=50;$('tm').value=30;
+for(let i=1;i<=10;i++){$('qc').add(new Option(bn(i)+' কলাম',i));$('qc2').add(new Option(bn(i)+' কলাম',i))}$('qc').value=2;$('qc2').value=3;
 const FONTS={'Noto Sans Bengali':'Noto+Sans+Bengali:wght@400;700','Noto Serif Bengali':'Noto+Serif+Bengali:wght@400;700','Hind Siliguri':'Hind+Siliguri:wght@400;700','Tiro Bangla':'Tiro+Bangla','Baloo Da 2':'Baloo+Da+2:wght@400;700','Anek Bangla':'Anek+Bangla:wght@400;700','Mina':'Mina:wght@400;700'};
 Object.keys(FONTS).forEach(f=>$('fnt').add(new Option(f,f)));
 async function loadFont(f){if(!f||!FONTS[f])return;const id='f_'+f.replace(/ /g,'_');
@@ -89,8 +92,8 @@ async function loadFont(f){if(!f||!FONTS[f])return;const id='f_'+f.replace(/ /g,
  try{await document.fonts.load(`14px "${f}"`,'কখগ১২৩');await document.fonts.load(`700 14px "${f}"`,'কখগ১২৩')}catch(e){}}
 $('fnt').onchange=async()=>{const f=$('fnt').value;await loadFont(f);$('fprev').style.fontFamily=`"${f}",sans-serif`};
 $('fsz').onchange=()=>{$('fprev').style.fontSize=($('fsz').value>0?$('fsz').value:14)+'px'};
-const getMeta=()=>({ex:$('ex').value.trim(),sb:$('sb').value.trim(),ch:$('ch').value.trim(),fm:+$('fm').value,tm:+$('tm').value,cols:+$('qc').value,font:$('fnt').value,fs:+$('fsz').value});
-try{const M=JSON.parse(localStorage.getItem('omrmeta')||'{}');['ex','sb','ch'].forEach(k=>M[k]&&($(k).value=M[k]));M.fm&&($('fm').value=M.fm);M.tm&&($('tm').value=M.tm);M.cols&&($('qc').value=M.cols);M.font&&FONTS[M.font]&&($('fnt').value=M.font);M.fs!==undefined&&($('fsz').value=M.fs);$('fsz').onchange();$('fnt').onchange()}catch(e){}
+const getMeta=()=>({ex:$('ex').value.trim(),sb:$('sb').value.trim(),ch:$('ch').value.trim(),fm:+$('fm').value,tm:+$('tm').value,cols:+$('qc').value,cols2:+$('qc2').value,neg:$('ngp').value.trim(),font:$('fnt').value,fs:+$('fsz').value});
+try{const M=JSON.parse(localStorage.getItem('omrmeta')||'{}');['ex','sb','ch'].forEach(k=>M[k]&&($(k).value=M[k]));M.fm&&($('fm').value=M.fm);M.tm&&($('tm').value=M.tm);M.cols&&($('qc').value=M.cols);M.cols2&&($('qc2').value=M.cols2);M.neg&&($('ngp').value=M.neg);M.font&&FONTS[M.font]&&($('fnt').value=M.font);M.fs!==undefined&&($('fsz').value=M.fs);$('fsz').onchange();$('fnt').onchange()}catch(e){}
 const newCode=()=>{let c;do c=String(100000+(Math.random()*900000|0));while(SETS[c]);return c};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -144,17 +147,17 @@ function omrHTML(s){
  return h}
 
 function paperPages(s,res,sum){
- const st=$('stage'),pages=[],m=s.meta||{};let pg,cols,ci;const nc=[2,3,4].includes(+m.cols)?+m.cols:2,cw=Math.floor((738-(nc-1)*12)/nc);
- const hdr=`<div style="position:absolute;left:352px;top:24px;width:738px;height:108px;border-bottom:1px solid #000;display:flex;gap:10px"><img src="${qr(s)}" style="width:84px;height:84px;image-rendering:pixelated"><div style="flex:1;line-height:1.45"><div style="font-size:17px;font-weight:700">${esc(m.ex||'')}${res?' — ফলাফল':''}</div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>পূর্ণমান: <b>${m.fm?bn(m.fm):''}</b> &nbsp; সময়: <b>${m.tm?tf(m.tm):''}</b> &nbsp; মোট প্রশ্ন: ${bn(s.qs.length)}</div><div>${sum||'নাম: ............................ রেজি. নং: ...........'}</div></div><div style="text-align:right"><img src="${LOGO}" style="height:36px;display:block;margin-left:auto"><div style="margin-top:6px">সেট নং: <b style="font-size:18px">${s.code}</b></div></div></div>`;
- const np=first=>{const ox=pages.length%2?33:352;pg=document.createElement('div');pg.className='pg'+(nc>2?' c'+nc:'');
+ const st=$('stage'),pages=[],m=s.meta||{};let pg,cols,ci;const cl=v=>{v=+v;return v>=1&&v<=10?v:0},nc=cl(m.cols)||2,nc2=cl(m.cols2)||nc,AF=[13,14,13,11.5,10.5,9.5,9,8.5,8,7.5,7];let cw=0,cn=nc,cfs=13;
+ const hdr=`<div style="position:absolute;left:352px;top:24px;width:738px;height:108px;border-bottom:1px solid #000;display:flex;gap:10px"><img src="${qr(s)}" style="width:84px;height:84px;image-rendering:pixelated"><div style="flex:1;line-height:1.45"><div style="font-size:17px;font-weight:700">${esc(m.ex||'')}${res?' — ফলাফল':''}</div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>পূর্ণমান: <b>${m.fm?bn(m.fm):''}</b> &nbsp; সময়: <b>${m.tm?tf(m.tm):''}</b> &nbsp; মোট প্রশ্ন: ${bn(s.qs.length)}</div>${m.neg&&!res?`<div>নেগেটিভ মার্কিং: <b>${esc(m.neg)}</b></div>`:''}<div>${sum||'নাম: ............................ রেজি. নং: ...........'}</div></div><div style="text-align:right"><img src="${LOGO}" style="height:36px;display:block;margin-left:auto"><div style="margin-top:6px">সেট নং: <b style="font-size:18px">${s.code}</b></div></div></div>`;
+ const np=first=>{const pi=pages.length,full=pi>=2,ox=full?33:(pi%2?33:352);cn=full?nc2:nc;cw=Math.floor(((full?1057:738)-(cn-1)*12)/cn);cfs=m.fs>0?m.fs:AF[cn];pg=document.createElement('div');pg.className='pg';
   pg.innerHTML=first?((res?'':omrHTML(s))+hdr):`<span class=sn style="left:${ox}px;right:auto">সেট নং: ${s.code}</span>`;
   st.appendChild(pg);pages.push(pg);const top=first?140:44,h=764-top;
-  cols=[...Array(nc).keys()].map(k=>{const c=document.createElement('div');c.className='col';c.style.cssText=`left:${ox+k*(cw+12)}px;width:${cw}px;top:${top}px;height:${h}px;font-family:'${m.font||'Noto Sans Bengali'}','Noto Sans Bengali',sans-serif${m.fs>0?`;font-size:${m.fs}px`:''}`;pg.appendChild(c);return c});ci=0};
+  cols=[...Array(cn).keys()].map(k=>{const c=document.createElement('div');c.className='col';c.style.cssText=`left:${ox+k*(cw+12)}px;width:${cw}px;top:${top}px;height:${h}px;font-family:'${m.font||'Noto Sans Bengali'}','Noto Sans Bengali',sans-serif;font-size:${cfs}px`;pg.appendChild(c);return c});ci=0};
  np(true);
  s.qs.forEach((q,i)=>{const d=document.createElement('div');d.className='q';
-  d.innerHTML=`<div><b>${i+1}.</b> ${esc(q.t)}</div><div class="op${q.o.every(o=>o.length<=[0,0,14,8,4][nc])?'':' l'}">`+q.o.map((o,j)=>`<span class="${res?(j==q.a?'g':j==res[i]?'r':''):''}">${L[j]}) ${esc(o)}</span>`).join('')+'</div>';
+  d.innerHTML=`<div><b>${i+1}.</b> ${esc(q.t)}</div><div class="op${q.o.every(o=>o.length<=(cn==1?40:cn<=4?[0,0,14,8,4][cn]:Math.max(0,Math.floor((cw-28)/2/(cfs*.8))-3)))?'':' l'}">`+q.o.map((o,j)=>`<span class="${res?(j==q.a?'g':j==res[i]?'r':''):''}">${L[j]}) ${esc(o)}</span>`).join('')+'</div>';
   cols[ci].appendChild(d);
-  if(d.offsetTop+d.offsetHeight>cols[ci].clientHeight&&cols[ci].children.length>1){cols[ci].removeChild(d);if(ci<nc-1)ci++;else np(false);cols[ci].appendChild(d)}});
+  if(d.offsetTop+d.offsetHeight>cols[ci].clientHeight&&cols[ci].children.length>1){cols[ci].removeChild(d);if(ci<cn-1)ci++;else np(false);cols[ci].appendChild(d)}});
  return pages}
 
 async function toPDF(pages,d){const own=!d;d=d||new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
