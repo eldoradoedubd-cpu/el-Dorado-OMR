@@ -56,6 +56,9 @@ small,.mu{color:var(--mu);font-size:13px}
 
 <div class="c"><h2>📚 আগের প্রশ্নসমূহ (ইতিহাস)</h2>
 <small>প্রতিবার প্রশ্নপত্র তৈরি করলে প্রশ্ন, উত্তর ও সেটিংস এখানে নিজে থেকে জমা হয় (এই ব্রাউজারে, সর্বোচ্চ ৪০টি)। "ব্যবহার করুন" চাপলে সব উপরের ঘরে বসে যাবে; তখন শুধু সেট সংখ্যা দিয়ে আবার তৈরি করুন।</small>
+<div id="drv" style="margin:10px 0 4px"><button id="dcon">☁️ Google Drive সংযুক্ত করুন</button><button id="dsy" class="s" style="display:none">এখনই সিঙ্ক</button><button id="doff" class="s" style="display:none">বিচ্ছিন্ন করুন</button>
+<div id="dst" class="mu" style="margin-top:6px"></div>
+<details style="margin-top:6px"><summary class="mu">উন্নত: Client ID</summary><input id="dcid" style="width:100%;margin-top:6px" placeholder="...apps.googleusercontent.com"></details></div>
 <div id="hl"></div></div>
 
 <div class="c"><h2>২. OMR স্ক্যান ও ফলাফল</h2>
@@ -186,16 +189,21 @@ $('gen').onclick=async()=>{
   $('dlzip').disabled=false;$('st').textContent=`${n}টি সেট তৈরি হয়েছে (ব্যাচ ${batch})। PDF ডাউনলোড করুন।`}
  catch(e){$('st').textContent='ত্রুটি: '+e.message}
  $('gen').disabled=false};
-let HIST=[];try{HIST=JSON.parse(localStorage.getItem('omrhist')||'[]')}catch(e){}
-const saveH=()=>{try{localStorage.setItem('omrhist',JSON.stringify(HIST))}catch(e){$('st').textContent+=' (ইতিহাস সংরক্ষণ হয়নি: জায়গা শেষ)'}};
-function saveHist(meta,n){const sig=JSON.stringify(Q),i=HIST.findIndex(h=>JSON.stringify(h.qs)===sig);
+let HIST=[],HDEL={};try{HIST=JSON.parse(localStorage.getItem('omrhist')||'[]');HDEL=JSON.parse(localStorage.getItem('omrhdel')||'{}')}catch(e){}
+const hk=qs=>{const t=JSON.stringify(qs);let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return (h>>>0).toString(36)+t.length.toString(36)};
+HIST.forEach(h=>{h.k=h.k||hk(h.qs)});
+const saveH=()=>{try{localStorage.setItem('omrhist',JSON.stringify(HIST));localStorage.setItem('omrhdel',JSON.stringify(HDEL))}catch(e){$('st').textContent+=' (ইতিহাস সংরক্ষণ হয়নি: জায়গা শেষ)'}};
+function saveHist(meta,n){const qs=Q.map(q=>({t:q.t,o:q.o.slice(),a:q.a})),k=hk(qs),i=HIST.findIndex(h=>h.k===k);
  if(i>=0){const h=HIST.splice(i,1)[0];h.ts=Date.now();h.meta=meta;h.gen=(h.gen||0)+n;HIST.unshift(h)}
- else HIST.unshift({id:Date.now(),ts:Date.now(),meta,qs:Q.map(q=>({t:q.t,o:q.o.slice(),a:q.a})),gen:n});
- HIST=HIST.slice(0,40);saveH();renderHist()}
+ else HIST.unshift({id:Date.now(),k,ts:Date.now(),meta,qs,gen:n});
+ delete HDEL[k];HIST=HIST.slice(0,40);saveH();renderHist();autoSync()}
+function hmerge(rm){const del={...HDEL};for(const k in(rm.del||{}))del[k]=Math.max(del[k]||0,rm.del[k]);
+ const m={};[...HIST,...(rm.items||[])].forEach(h=>{h.k=h.k||hk(h.qs);const o=m[h.k];if(!o)m[h.k]=h;else{const n=h.ts>=o.ts?h:o;n.gen=Math.max(h.gen||0,o.gen||0);m[h.k]=n}});
+ HDEL=del;HIST=Object.values(m).filter(h=>!(del[h.k]&&del[h.k]>=h.ts)).sort((a,b)=>b.ts-a.ts).slice(0,40);saveH()}
 function renderHist(){$('hl').innerHTML=HIST.length?HIST.map(h=>{const m=h.meta||{},dt=new Date(h.ts).toLocaleDateString('bn-BD'),sub=[m.sb,m.ch].filter(Boolean).join(' • ');
   return `<div style="border-top:1px solid var(--bd);padding:8px 0;margin-top:8px"><b>${esc(m.ex||m.sb||'নামহীন')}</b><br><small>${sub?esc(sub)+' | ':''}${bn(h.qs.length)}টি প্রশ্ন | ${dt} | এ পর্যন্ত ${bn(h.gen||0)}টি সেট</small><br><button data-u="${h.id}">এই প্রশ্নগুলো ব্যবহার করুন</button><button class="s" data-d="${h.id}">মুছুন</button><details><summary>প্রশ্ন দেখুন</summary>${h.qs.map((q,i)=>`<div style="font-size:14px;margin:6px 0"><b>${bn(i+1)}.</b> ${esc(q.t)}<br><small>${q.o.map((o,j)=>(j==q.a?'✓ ':'')+L[j]+') '+esc(o)).join(' &nbsp; ')}</small></div>`).join('')}</details></div>`}).join(''):'<small>এখনো কিছু জমা হয়নি। প্রথম প্রশ্নপত্র তৈরি করলেই এখানে দেখা যাবে।</small>'}
 $('hl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
- if(b.dataset.d){if(!b.dataset.arm){b.dataset.arm=1;b.textContent='নিশ্চিত? আবার চাপুন';setTimeout(()=>{b.dataset.arm='';b.textContent='মুছুন'},3000)}else{HIST=HIST.filter(x=>x.id!=b.dataset.d);saveH();renderHist()}return}
+ if(b.dataset.d){if(!b.dataset.arm){b.dataset.arm=1;b.textContent='নিশ্চিত? আবার চাপুন';setTimeout(()=>{b.dataset.arm='';b.textContent='মুছুন'},3000)}else{const h=HIST.find(x=>x.id==b.dataset.d);if(h)HDEL[h.k]=Date.now();HIST=HIST.filter(x=>x.id!=b.dataset.d);saveH();renderHist();autoSync()}return}
  if(b.dataset.u){const h=HIST.find(x=>x.id==b.dataset.u);if(!h)return;const m=h.meta||{};
   Q=h.qs.map(q=>({t:q.t,o:q.o.slice(),a:q.a}));
   $('qt').value=Q.map(q=>`${q.t}\n${q.o.map((o,j)=>L[j]+') '+o).join('\n')}\nউত্তর: ${L[q.a]}`).join('\n\n');
@@ -205,6 +213,37 @@ $('hl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
   $('qinfo').textContent=`${Q.length}টি প্রশ্ন পাওয়া গেছে`;$('st').textContent='প্রশ্নগুলো বসানো হয়েছে। সেট সংখ্যা ঠিক করে "প্রশ্নপত্র তৈরি করুন" চাপুন।';
   $('cnt').scrollIntoView({behavior:'smooth',block:'center'})}};
 renderHist();
+
+const CID0='457254150436-67k0iofhhk59jnj0a6n44tfuih04epgc.apps.googleusercontent.com';
+const getCid=()=>(localStorage.getItem('omr_cid')||CID0).trim();
+let DTOK=null,DEXP=0,DFID=localStorage.getItem('omr_dfid')||'',DBUSY=false;
+const dst=t=>{$('dst').textContent=t},dOn=()=>localStorage.getItem('omr_drive')==='1';
+function dui(){const on=dOn();$('dcon').style.display=on?'none':'';$('dsy').style.display=$('doff').style.display=on?'':'none';$('dcid').value=getCid()}
+const gsi=()=>new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();const x=document.createElement('script');x.src='https://accounts.google.com/gsi/client';x.onload=res;x.onerror=()=>rej(new Error('Google স্ক্রিপ্ট লোড হয়নি, ইন্টারনেট দেখুন'));document.head.appendChild(x)});
+async function dtoken(prompt){if(DTOK&&Date.now()<DEXP)return DTOK;await gsi();
+ return new Promise((res,rej)=>{const tm=setTimeout(()=>rej(new Error('অনুমতি পাওয়া যায়নি')),prompt==='none'?8000:120000);
+  const tc=google.accounts.oauth2.initTokenClient({client_id:getCid(),scope:'https://www.googleapis.com/auth/drive.file',
+   callback:r=>{clearTimeout(tm);if(r.error)return rej(new Error(r.error));DTOK=r.access_token;DEXP=Date.now()+(r.expires_in-60)*1000;res(DTOK)},
+   error_callback:e=>{clearTimeout(tm);rej(new Error(e.type||'popup'))}});
+  tc.requestAccessToken({prompt})})}
+async function dsync(prompt){if(DBUSY)return;DBUSY=true;
+ try{const t=await dtoken(prompt),H={Authorization:'Bearer '+t},B='https://www.googleapis.com/';
+  if(!DFID){const r=await fetch(B+'drive/v3/files?spaces=drive&fields=files(id)&q='+encodeURIComponent("name='omr-history.json' and trashed=false"),{headers:H});if(!r.ok)throw new Error('Drive '+r.status);const j=await r.json();if(j.files&&j.files[0])DFID=j.files[0].id}
+  if(DFID){const r=await fetch(B+'drive/v3/files/'+DFID+'?alt=media',{headers:H});
+   if(r.status==404)DFID='';else if(r.ok){let rm={};try{rm=await r.json()}catch(e){}hmerge(rm)}else throw new Error('Drive '+r.status)}
+  const body=JSON.stringify({items:HIST,del:HDEL});let r;
+  if(DFID)r=await fetch(B+'upload/drive/v3/files/'+DFID+'?uploadType=media',{method:'PATCH',headers:{...H,'Content-Type':'application/json'},body});
+  else{const bd='bd'+Date.now(),mp=`--${bd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({name:'omr-history.json',mimeType:'application/json'})}\r\n--${bd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bd}--`;
+   r=await fetch(B+'upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{...H,'Content-Type':'multipart/related; boundary='+bd},body:mp})}
+  if(!r.ok)throw new Error('Drive '+r.status);const j=await r.json();if(j.id){DFID=j.id}
+  localStorage.setItem('omr_dfid',DFID);renderHist();dst('✅ Drive-এ সিঙ্ক হয়েছে — '+new Date().toLocaleTimeString('bn-BD'))
+ }catch(e){if(/401|invalid/.test(e.message))DTOK=null;dst('⚠️ সিঙ্ক হয়নি ('+e.message+'). "এখনই সিঙ্ক" চাপুন।');throw e}finally{DBUSY=false}}
+function autoSync(){if(dOn())dsync('').catch(()=>{})}
+$('dcon').onclick=async()=>{dst('সংযুক্ত হচ্ছে...');try{await dsync('consent');localStorage.setItem('omr_drive','1');dui()}catch(e){}};
+$('dsy').onclick=()=>dsync('').catch(()=>{});
+$('doff').onclick=()=>{localStorage.removeItem('omr_drive');localStorage.removeItem('omr_dfid');DFID='';DTOK=null;dui();dst('Drive বিচ্ছিন্ন হয়েছে (Drive-এর ফাইল মুছে যায়নি)।')};
+$('dcid').onchange=()=>{localStorage.setItem('omr_cid',$('dcid').value.trim());DTOK=null;dst('Client ID সেভ হয়েছে।')};
+dui();if(dOn()){dst('Drive থেকে ইতিহাস আনা হচ্ছে...');dsync('none').catch(()=>dst('Drive সংযুক্ত আছে। সিঙ্ক করতে "এখনই সিঙ্ক" চাপুন।'))}
 $('dlzip').onclick=()=>zipBlob&&dl(zipName,zipBlob);
 $('dlkey').onclick=()=>keyText&&dl('answer_keys.csv',keyText);
 
