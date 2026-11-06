@@ -72,7 +72,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <label>ভুল উত্তরে নেগেটিভ মার্কিং</label>
 <select id="neg"><option value="0">নেই</option><option value="0.25">০.২৫</option><option value="0.5">০.৫</option></select>
 <div class="row"><div><label>শিক্ষার্থীর নাম (ফলাফল PDF এর জন্য)</label><input id="stn"></div><div><label>রেজি. নং (OMR থেকে নিজে আসবে)</label><input id="reg" maxlength="7" placeholder="স্বয়ংক্রিয়"></div></div>
-<button id="cam">ক্যামেরা চালু করুন</button><button class="s" id="snap">এখনই স্ক্যান</button>
+<label>সেট নং (শিটের ওপরের "সেট নং"; QR না পড়া গেলে এটি কাজে লাগবে)</label><input id="fset" inputmode="numeric" maxlength="6" placeholder="যেমন 330777"><button id="cam">ক্যামেরা চালু করুন</button><button class="s" id="snap">এখনই স্ক্যান</button>
 <video id="vid" playsinline muted></video>
 <label>ছবি তুলে স্ক্যান (ফোনের ক্যামেরা)</label><input type="file" id="pic" accept="image/*" capture="environment">
 <label>আগে তোলা ছবি স্ক্যান (গ্যালারি থেকে; একসাথে একাধিকও বাছা যাবে)</label><input type="file" id="gal" accept="image/*" multiple>
@@ -267,7 +267,7 @@ const okCorners=cn=>{if(cn.some(p=>!p))return false;const[a,b,c,e]=cn,rw=Math.hy
  if(!rh||Math.abs(rw/rh-.4)>.14)return false;return Math.hypot(a[0]+e[0]-b[0]-c[0],a[1]+e[1]-b[1]-c[1])<.12*rh};
 const isOMR=c=>c&&c.data&&c.data.startsWith('OMR|');
 async function proc(src,sw,sh,quiet){
- const fail=m=>{if(!quiet)err(m);return false},k=Math.min(1,1600/Math.max(sw,sh)),W=Math.round(sw*k),H=Math.round(sh*k);
+ const fail=m=>{if(!quiet)err(m);else if(stream)$('res').innerHTML='<small>⏳ '+m+'</small>';return false},k=Math.min(1,1600/Math.max(sw,sh)),W=Math.round(sw*k),H=Math.round(sh*k);
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,W,H);
  const d=x.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);let sum=0;
  for(let i=0;i<W*H;i++){g[i]=d[4*i]*.3+d[4*i+1]*.59+d[4*i+2]*.11;sum+=g[i]}
@@ -292,9 +292,16 @@ async function proc(src,sw,sh,quiet){
    const id=qx.getImageData(0,0,qw,qh),q=id.data;let r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}
    let mn=255,mx=0;const gv=new Float32Array(qw*qh);for(let i=0;i<qw*qh;i++){const v=q[4*i]*.3+q[4*i+1]*.59+q[4*i+2]*.11;gv[i]=v;if(v<mn)mn=v;if(v>mx)mx=v}
    const th=(mn+mx)/2;for(let i=0;i<qw*qh;i++){const b=gv[i]<th?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
-   r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}}}
- if(!isOMR(code))return fail('QR কোড পড়া যায়নি। কাছে এনে, আলো ঠিক রেখে QR ও চার কোণ স্পষ্ট করে ছবি দিন।');
- const[,sc,n,ky,fm]=code.data.split('|');
+   r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}
+   const g8=new Uint8Array(qw*qh);for(let i=0;i<qw*qh;i++)g8[i]=gv[i];const lb=boxBlur(g8,qw,qh,Math.max(6,Math.round(qw/25)));
+   for(const fct of[.92,.8]){for(let i=0;i<qw*qh;i++){const b=g8[i]<lb[i]*fct?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
+    r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}}
+   if(isOMR(r)){code=r;break}}}
+ let sc,n,ky,fm;
+ if(isOMR(code))[,sc,n,ky,fm]=code.data.split('|');
+ else{const mc=($('fset').value||'').trim(),rec=mc&&SETS[mc];
+  if(!rec)return fail(mc?'এই সেট নং এই ব্রাউজারে নেই; নম্বর ঠিক আছে কিনা দেখুন।':'QR পড়া যায়নি। ওপরের "সেট নং" ঘরে শিটের সেট নং (যেমন 330777) লিখে আবার স্ক্যান করুন।');
+  const qq=rec.qs||rec;sc=mc;n=String(qq.length);ky=qq.map(q=>q.a+1).join('');fm=rec.meta&&rec.meta.fm}
  const R=4.5*Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/300,T2=mean*.72;
  const fill=(px,py)=>{let t=0,q=0;const r=Math.ceil(R);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>R*R)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;if(g[Y*W+X]<T2)t++}return q?t/q:0};
  const res=[];for(let i=0;i<+n;i++){const m=[];for(let j=0;j<4;j++){const[lx,ly]=pos(i,j),[px,py]=mp(lx,ly);if(fill(px,py)>.55)m.push(j)}res.push(m.length==0?-1:m.length==1?m[0]:4)}
