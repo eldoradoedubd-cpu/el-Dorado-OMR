@@ -23,14 +23,14 @@ small,.mu{color:var(--mu);font-size:13px}
 .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
 .chip{font-size:12px;padding:2px 6px;border-radius:6px;background:#ddd;color:#000}
 .chip.g{background:var(--g)}.chip.r{background:var(--r)}
-#vid{display:none;width:100%;border-radius:10px;margin-top:8px;background:#000}.big{font-size:18px;font-weight:700}
+#vid{display:block;width:100%;border-radius:10px;background:#000}.gd{position:absolute;left:50%;top:4%;height:92%;aspect-ratio:396/750;transform:translateX(-50%);border:2px dashed #4ade80;border-radius:8px;pointer-events:none;box-shadow:0 0 0 9999px #0003}#toast{display:none;position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:99;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 6px 20px #0007;line-height:1.5}.big{font-size:18px;font-weight:700}
 #stage{position:fixed;left:-9999px;top:0}
-.pg{width:1123px;height:794px;background:#fff;color:#000;position:relative;overflow:hidden;box-sizing:border-box;padding:0;font:13px/1.45 'Noto Sans Bengali',sans-serif}.col{position:absolute;width:362px;overflow:hidden}.tear{position:absolute;left:336px;top:0;height:794px;border-left:1.5px dashed #000}.op .f{grid-column:1/-1}.pg.c3{font-size:11.5px}.pg.c4{font-size:10.5px}.c table{width:100%;border-collapse:collapse;font-size:13px}.c td,.c th{border-bottom:1px solid var(--bd);padding:3px 4px;text-align:left}.rt td,.rt th{border:1px solid #000;padding:4px 8px;text-align:left}.cl{display:flex;gap:4px;align-items:center;font-size:13px}.cc{padding:1px 6px;border-radius:4px;background:#e5e7eb}.cc.g{background:#bbf7d0}.cc.r{background:#fecaca}
+.pg{width:1123px;height:794px;background:#fff;color:#000;position:relative;overflow:hidden;box-sizing:border-box;padding:0;font:13px/1.45 'Noto Sans Bengali',sans-serif}.col{position:absolute;width:362px;overflow:hidden}.tear{position:absolute;left:440px;top:0;height:794px;border-left:1.5px dashed #000}.op .f{grid-column:1/-1}.pg.c3{font-size:11.5px}.pg.c4{font-size:10.5px}.c table{width:100%;border-collapse:collapse;font-size:13px}.c td,.c th{border-bottom:1px solid var(--bd);padding:3px 4px;text-align:left}.rt td,.rt th{border:1px solid #000;padding:4px 8px;text-align:left}.cl{display:flex;gap:4px;align-items:center;font-size:13px}.cc{padding:1px 6px;border-radius:4px;background:#e5e7eb}.cc.g{background:#bbf7d0}.cc.r{background:#fecaca}
 .hd{position:relative;min-height:130px;border-bottom:1px solid #000;margin-bottom:10px;padding-bottom:6px}.hd img.lg{height:50px;display:block;margin-bottom:4px}.sn{position:absolute;top:14px;right:50px;font-size:12px;font-weight:700}.rg{display:inline-block;width:15px;height:17px;border:1.1px solid #000;margin-right:3px;vertical-align:middle}
 .q{margin-bottom:7px}.op{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;padding-left:18px}
 .op span{padding:0 4px 0 calc(4px + 1.3em);text-indent:-1.3em;border-radius:4px}.op .g{background:#bbf7d0}.op .r{background:#fecaca}
 .mk{position:absolute;width:20px;height:20px;background:#000}
-.bb{position:absolute;width:13px;height:13px;border:1.1px solid #000;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 7.5px/1 'Noto Sans Bengali',sans-serif;color:#999}
+.bb{position:absolute;width:13px;height:13px;border:1.1px solid #000;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 7.5px/1 'Noto Sans Bengali',sans-serif;color:#b4b4b4}
 .lb{position:absolute;font:700 13px 'Noto Sans Bengali',sans-serif;width:18px;text-align:center}
 .qr{position:absolute;width:130px;height:130px;image-rendering:pixelated}
 </style></head><body><main>
@@ -72,8 +72,9 @@ small,.mu{color:var(--mu);font-size:13px}
 <label>ভুল উত্তরে নেগেটিভ মার্কিং</label>
 <select id="neg"><option value="0">নেই</option><option value="0.25">০.২৫</option><option value="0.5">০.৫</option></select>
 <div class="row"><div><label>শিক্ষার্থীর নাম (ফলাফল PDF এর জন্য)</label><input id="stn"></div><div><label>রেজি. নং (OMR থেকে নিজে আসবে)</label><input id="reg" maxlength="7" placeholder="স্বয়ংক্রিয়"></div></div>
-<label>সেট নং (শিটের ওপরের "সেট নং"; QR না পড়া গেলে এটি কাজে লাগবে)</label><input id="fset" inputmode="numeric" maxlength="6" placeholder="যেমন 330777"><button id="cam">ক্যামেরা চালু করুন</button><button class="s" id="snap">এখনই স্ক্যান</button>
-<video id="vid" playsinline muted></video>
+<label>সেট নং (শিটের ওপরের "সেট নং"; QR না পড়া গেলে এটি কাজে লাগবে)</label><input id="fset" inputmode="numeric" maxlength="6" placeholder="যেমন 330777"><button id="cam">📷 ক্যামেরায় সরাসরি স্ক্যান</button><button class="s" id="snap">এখনই স্ক্যান</button>
+<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="cont" style="width:auto"> পরপর স্ক্যান (একটির পর আরেকটি; ক্যামেরা বন্ধ হবে না)</label>
+<div id="vw" style="display:none;position:relative;margin-top:8px"><video id="vid" playsinline muted></video><div class="gd"></div></div><div id="cst" class="mu" style="margin-top:6px"></div>
 <label>ছবি তুলে স্ক্যান (ফোনের ক্যামেরা)</label><input type="file" id="pic" accept="image/*" capture="environment">
 <label>আগে তোলা ছবি স্ক্যান (গ্যালারি থেকে; একসাথে একাধিকও বাছা যাবে)</label><input type="file" id="gal" accept="image/*" multiple>
 <details style="margin-top:10px"><summary>ক্যামেরা না চললে: হাতে লিখে এন্ট্রি</summary>
@@ -83,7 +84,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <button id="mgo">ফলাফল দেখুন</button></details>
 <div id="res"></div>
 <h2 style="margin:16px 0 4px">সংরক্ষিত ফলাফল</h2><div id="lst"></div><button class="s" id="rcsv">ফলাফল PDF ডাউনলোড</button><button class="s" id="rclr">তালিকা মুছুন</button></div>
-</main><div id="stage"></div>
+</main><div id="toast"></div><div id="stage"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -141,34 +142,39 @@ function parseQ(t){const out=[];t=t.replace(/\r/g,'');
  return out}
 $('qt').oninput=()=>{const v=$('qt').value.trim();Q=v?parseQ(v):[];$('qinfo').textContent=v?(Q.length?`${Q.length}টি প্রশ্ন পাওয়া গেছে`+(Q.length>100?' — সর্বোচ্চ ১০০টি অনুমোদিত':''):'কোনো প্রশ্ন পাওয়া যায়নি, ফরম্যাট মিলিয়ে দেখুন'):''};
 $('sample').onclick=()=>{$('qt').value=SAMPLE;$('qt').oninput()};
-const pos=(i,j)=>[12+Math.floor(i/25)*76+25.5+j*14.5,362+(i%25)*16];
-const RG=(k,d)=>[216+k*15,203+d*14.5];
+/* ===== OMR জ্যামিতি: লে-আউট ২ (নতুন, বড় ও ফাঁকা) ও ১ (পুরনো ছাপা শিটের জন্য) ===== */
+const QX=456,QW=634;
+const ageo=n=>{const G=n>75?4:n>40?3:2,rpg=Math.max(1,Math.ceil(n/G)),gw=388/G,hs=Math.min(26,(gw-40)/3),vs=rpg>1?Math.min(24,(750-336)/(rpg-1)):0;return{G,rpg,gw,hs,vs,bd:Math.round(Math.max(11,Math.min(17,hs-4.5,vs-3.5))*10)/10}};
+const GEO={
+ 1:{mx:18,my:22,mw:300,mh:750,bd:()=>13,rb:13,pos:(i,j)=>[12+Math.floor(i/25)*76+25.5+j*14.5,362+(i%25)*16],rg:(k,d)=>[216+k*15,203+d*14.5],qr:[[214,16],[330,16],[214,124],[330,124]]},
+ 2:{mx:22,my:22,mw:396,mh:750,bd:n=>ageo(n).bd,rb:14,pos:(i,j,n)=>{const A=ageo(n),g=Math.floor(i/A.rpg),r=i%A.rpg;return[26+g*A.gw+26+j*A.hs,336+r*A.vs]},rg:(k,d)=>[80+d*19,206+k*17],qr:[[306,28],[424,28],[306,142],[424,142]]}};
 const key=s=>s.qs.map(q=>q.a+1).join('');
-function qr(s){const q=qrcode(0,'L');q.addData(`OMR|${s.code}|${s.qs.length}|${key(s)}|${(s.meta||{}).fm||s.qs.length}`);q.make();return q.createDataURL(3,0)}
+function qr(s){const q=qrcode(0,'L');q.addData(`OMR|${s.code}|${s.qs.length}|${key(s)}|${(s.meta||{}).fm||s.qs.length}|2`);q.make();return q.createDataURL(6,6)}
 function mk(code,meta){const qs=sh(Q.map((_,i)=>i)).map(i=>{const q=Q[i],p=sh([0,1,2,3]);return{t:q.t,o:p.map(k=>q.o[k]),a:p.indexOf(q.a)}});return{code,qs,meta}}
 
 function omrHTML(s){
- const m=s.meta||{},n=s.qs.length;
- let h='<div class=tear></div>'+[[18,22],[318,22],[18,772],[318,772]].map(([x,y])=>`<i class=mk style="left:${x-8}px;top:${y-8}px;width:16px;height:16px"></i>`).join('');
- h+=`<img src="${LOGO}" style="position:absolute;left:34px;top:34px;height:30px"><img class=qr style="left:222px;top:36px;width:80px;height:80px" src="${qr(s)}">
-<div style="position:absolute;left:34px;top:70px;width:184px;line-height:1.3"><b style="font-size:11px">OMR উত্তরপত্র</b><br>সেট নং: <b style="font-size:16px;letter-spacing:1px">${s.code}</b></div>
-<div style="position:absolute;left:34px;top:116px;width:284px;font-size:10px;line-height:1.5"><div>পরীক্ষা: <b>${esc(m.ex||'')}</b></div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>নাম: ........................................................</div></div>
-<div style="position:absolute;left:34px;top:166px;width:166px;font-size:8px;line-height:1.3"><b>নির্দেশনা:</b> ১. কালো/নীল বলপয়েন্টে বৃত্ত পুরো ভরাট করুন (পেন্সিল নয়)।<br>২. প্রতি প্রশ্নে একটিই বৃত্ত ভরাট করুন; একাধিক বা কাটাকাটি করলে ভুল ধরা হবে।<br>৩. ভরাট করা উত্তর বদলানো যাবে না।<br>৪. রেজি. নং ঘরে লিখে নিচের প্রতি কলামে সংশ্লিষ্ট অঙ্কের বৃত্ত ভরাট করুন।<br>৫. কোণের কালো বর্গ ও QR এ কিছু লিখবেন না।<br>৬. সেট নং প্রশ্নপত্রের সাথে মিলিয়ে নিন।<br>৭. ডটেড লাইন বরাবর OMR অংশ ছিঁড়ে জমা দিন।</div>
-<div style="position:absolute;left:206px;top:158px;width:112px;text-align:center;font-size:8px;line-height:1.2"><b>রেজি. নং</b> (৭ অঙ্ক)</div>`;
- for(let k=0;k<7;k++){h+=`<i class=rg style="position:absolute;left:${RG(k,0)[0]-6.5}px;top:172px;width:13px;height:15px;margin:0"></i>`;
-  for(let d=0;d<10;d++){const[x,y]=RG(k,d);h+=`<b class=bb style="left:${x-6.5}px;top:${y-6.5}px">${d}</b>`}}
- s.qs.forEach((q,i)=>{const[bx,y]=pos(i,0);h+=`<span class=lb style="left:${bx-25.5}px;top:${y-6}px;width:16px;text-align:right;font:400 9px/12px 'Noto Sans Bengali',sans-serif">${i+1}</span>`;
-  for(let j=0;j<4;j++){const[x,yy]=pos(i,j);h+=`<b class=bb style="left:${x-6.5}px;top:${yy-6.5}px">${L[j]}</b>`}});
+ const m=s.meta||{},n=s.qs.length,G=GEO[2],bd=G.bd(n),rb=G.rb,A=ageo(n);
+ let h='<div class=tear></div>'+[[22,22],[418,22],[22,772],[418,772]].map(([x,y])=>`<i class=mk style="left:${x-10}px;top:${y-10}px;width:20px;height:20px"></i>`).join('');
+ h+=`<img src="${LOGO}" style="position:absolute;left:40px;top:38px;height:28px"><img class=qr style="left:316px;top:38px;width:96px;height:96px;image-rendering:auto" src="${qr(s)}">
+<div style="position:absolute;left:40px;top:72px;width:260px;line-height:1.3"><b style="font-size:12px">OMR উত্তরপত্র</b><br>সেট নং: <b style="font-size:17px;letter-spacing:1px">${s.code}</b></div>
+<div style="position:absolute;left:40px;top:116px;width:270px;font-size:9.5px;line-height:1.5"><div>পরীক্ষা: <b>${esc(m.ex||'')}</b></div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>নাম: ..............................................</div></div>
+<div style="position:absolute;left:40px;top:160px;font-size:9px;font-weight:700">রেজি. নং (৭ অঙ্ক) — ঘরে লিখে, নিচে প্রতি সারিতে বৃত্ত ভরাট করুন</div>
+<div style="position:absolute;left:270px;top:176px;width:146px;font-size:7.5px;line-height:1.3"><b>নির্দেশনা:</b> ১. কালো/নীল বলপয়েন্টে বৃত্ত পুরো ভরাট করুন (পেন্সিল নয়)।<br>২. প্রতি প্রশ্নে একটিই বৃত্ত ভরাট করুন; কাটাকাটি করলে ভুল ধরা হবে।<br>৩. রেজি. নং এর প্রতি সারিতে একটি অঙ্কের বৃত্ত ভরাট করুন।<br>৪. কোণের কালো বর্গ ও QR এ কিছু লিখবেন না।<br>৫. সেট নং প্রশ্নপত্রের সাথে মিলিয়ে নিন।<br>৬. ডটেড লাইন বরাবর ছিঁড়ে জমা দিন।</div>`;
+ for(let k=0;k<7;k++){h+=`<i class=rg style="position:absolute;left:${80+k*22-8}px;top:174px;width:16px;height:18px;margin:0"></i>`;
+  const y0=G.rg(k,0)[1];h+=`<span class=lb style="left:34px;top:${y0-6}px;width:36px;text-align:right;font:400 7.5px/12px 'Noto Sans Bengali',sans-serif">অঙ্ক ${bn(k+1)}</span>`;
+  for(let d=0;d<10;d++){const[x,y]=G.rg(k,d);h+=`<b class=bb style="left:${x-rb/2}px;top:${y-rb/2}px;width:${rb}px;height:${rb}px;font-size:7.5px">${d}</b>`}}
+ s.qs.forEach((q,i)=>{const[bx,y]=G.pos(i,0,n);h+=`<span class=lb style="left:${bx-30}px;top:${y-6}px;width:18px;text-align:right;font:400 9px/12px 'Noto Sans Bengali',sans-serif">${i+1}</span>`;
+  for(let j=0;j<4;j++){const[x,yy]=G.pos(i,j,n);h+=`<b class=bb style="left:${x-bd/2}px;top:${yy-bd/2}px;width:${bd}px;height:${bd}px;font-size:${Math.min(9,bd*.55)}px">${L[j]}</b>`}});
  return h}
 
 const mc=document.createElement('canvas').getContext('2d'),mw={};
 const tw=(t,fs,f)=>{const k=fs+'|'+f+'|'+t;if(mw[k]===undefined){mc.font=`${fs}px "${f}","Noto Sans Bengali",sans-serif`;mw[k]=mc.measureText(t).width}return mw[k]};
 function paperPages(s,res,sum){
  const st=$('stage'),pages=[],m=s.meta||{};let pg,cols,ci;const cl=v=>{v=+v;return v>=1&&v<=10?v:0},nc=cl(m.cols)||2,nc2=cl(m.cols2)||nc,AF=[13,14,13,11.5,10.5,9.5,9,8.5,8,7.5,7];let cw=0,cn=nc,cfs=13;
- const hdr=`<div style="position:absolute;left:352px;top:24px;width:738px;height:108px;border-bottom:1px solid #000;display:flex;gap:10px"><img src="${qr(s)}" style="width:84px;height:84px;image-rendering:pixelated"><div style="flex:1;line-height:1.45"><div style="font-size:17px;font-weight:700">${esc(m.ex||'')}${res?' — ফলাফল':''}</div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>পূর্ণমান: <b>${m.fm?bn(m.fm):''}</b> &nbsp; সময়: <b>${m.tm?tf(m.tm):''}</b> &nbsp; মোট প্রশ্ন: ${bn(s.qs.length)}</div>${m.neg&&!res?`<div>নেগেটিভ মার্কিং: <b>${esc(m.neg)}</b></div>`:''}<div>${sum||'নাম: ............................ রেজি. নং: ...........'}</div></div><div style="text-align:right"><img src="${LOGO}" style="height:36px;display:block;margin-left:auto"><div style="margin-top:6px">সেট নং: <b style="font-size:18px">${s.code}</b></div></div></div>`;
- const np=first=>{const pi=pages.length,full=pi>=2,ox=full?33:(pi%2?33:352);cn=full?nc2:nc;cw=Math.floor(((full?1057:738)-(cn-1)*12)/cn);cfs=m.fs>0?m.fs:AF[cn];pg=document.createElement('div');pg.className='pg';
+ const hdr=`<div style="position:absolute;left:${QX}px;top:24px;width:${QW}px;height:112px;border-bottom:1px solid #000;display:flex;gap:10px"><img src="${qr(s)}" style="width:84px;height:84px"><div style="flex:1;line-height:1.45;font-size:12.5px"><div style="font-size:17px;font-weight:700">${esc(m.ex||'')}${res?' — ফলাফল':''}</div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>পূর্ণমান: <b>${m.fm?bn(m.fm):''}</b> &nbsp; সময়: <b>${m.tm?tf(m.tm):''}</b> &nbsp; মোট প্রশ্ন: ${bn(s.qs.length)}</div>${m.neg&&!res?`<div>নেগেটিভ মার্কিং: <b>${esc(m.neg)}</b></div>`:''}<div>${sum||'নাম: ............................ রেজি. নং: ...........'}</div></div><div style="text-align:right"><img src="${LOGO}" style="height:36px;display:block;margin-left:auto"><div style="margin-top:6px">সেট নং: <b style="font-size:18px">${s.code}</b></div></div></div>`;
+ const np=first=>{const pi=pages.length,full=pi>=2,ox=full?33:(pi%2?33:QX);cn=full?nc2:nc;cw=Math.floor(((full?1057:QW)-(cn-1)*12)/cn);cfs=m.fs>0?m.fs:AF[cn];pg=document.createElement('div');pg.className='pg';
   pg.innerHTML=first?((res?'':omrHTML(s))+hdr):`<span class=sn style="left:${ox}px;right:auto">সেট নং: ${s.code}</span>`;
-  st.appendChild(pg);pages.push(pg);const top=first?140:44,h=764-top;
+  st.appendChild(pg);pages.push(pg);const top=first?148:44,h=764-top;
   cols=[...Array(cn).keys()].map(k=>{const c=document.createElement('div');c.className='col';c.style.cssText=`left:${ox+k*(cw+12)}px;width:${cw}px;top:${top}px;height:${h}px;font-family:'${m.font||'Noto Sans Bengali'}','Noto Sans Bengali',sans-serif;font-size:${cfs}px`;pg.appendChild(c);return c});ci=0};
  np(true);
  s.qs.forEach((q,i)=>{const d=document.createElement('div');d.className='q';
@@ -189,7 +195,7 @@ $('gen').onclick=async()=>{
  $('gen').disabled=true;await document.fonts.load('14px "Noto Sans Bengali"');await loadFont($('fnt').value);
  const n=Math.min(200,Math.max(1,+$('cnt').value|0)),meta=getMeta(),made=[],batch=Math.random().toString(36).slice(2,6).toUpperCase(),doc=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});try{localStorage.setItem('omrmeta',JSON.stringify(meta))}catch(e){}if(meta.cid)meta.eid='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);PM='';try{await takenCodes()}catch(e){}let keys='সেট,উত্তরমালা (ক=1 খ=2 গ=3 ঘ=4)\n';
  try{for(let i=0;i<n;i++){$('st').textContent=`তৈরি হচ্ছে… ${i+1}/${n}`;await tick();
-  const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta};made.push(s.code);
+  const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta,lay:2};made.push(s.code);
   const pgs=paperPages(s);if(pgs.length%2){const b=document.createElement('div');b.className='pg';b.innerHTML='<div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:10px;color:#aaa">এই পৃষ্ঠা ইচ্ছাকৃতভাবে ফাঁকা</div>';$('stage').appendChild(b);pgs.push(b)}
   await toPDF(pgs,doc);keys+=`${s.code},${key(s)}\n`}
   try{localStorage.setItem('omrsets',JSON.stringify(SETS))}catch(e){}saveHist(meta,n);await pubAfterGen(meta,made);
@@ -270,8 +276,9 @@ function boxBlur(g,W,H,r){const t=new Float32Array(W*H),o=new Uint8Array(W*H),n=
  return o}
 const pickCorners=P=>{const f=fn=>P.reduce((b,p)=>!b||fn(p)<fn(b)?p:b,null);return[f(p=>p[0]+p[1]),f(p=>p[1]-p[0]),f(p=>p[0]-p[1]),f(p=>-(p[0]+p[1]))]};
 const okCorners=cn=>{if(cn.some(p=>!p))return false;const[a,b,c,e]=cn,rw=Math.hypot(b[0]-a[0],b[1]-a[1]),rh=Math.hypot(c[0]-a[0],c[1]-a[1]);
- if(!rh||Math.abs(rw/rh-.4)>.1)return false;if(Math.hypot(a[0]+e[0]-b[0]-c[0],a[1]+e[1]-b[1]-c[1])>.06*rh)return false;
- const ex=rw*16/300;return cn.every(p=>p[2]>.5*ex&&p[2]<1.9*ex)};
+ if(!rh)return false;const q=rw/rh;if(Math.abs(q-.4)>.1&&Math.abs(q-.528)>.1)return false;
+ if(Math.hypot(a[0]+e[0]-b[0]-c[0],a[1]+e[1]-b[1]-c[1])>.09*rh)return false;
+ const ex=rw*.052;return cn.every(p=>p[2]>.4*ex&&p[2]<2.2*ex)};
 const isOMR=c=>c&&c.data&&c.data.startsWith('OMR|');
 const qr_=(d,w,h)=>typeof jsQR==='function'?jsQR(d,w,h,{inversionAttempts:'attemptBoth'}):null;
 const nativeQR=async cv=>{try{if(!('BarcodeDetector' in window))return null;const r=await new BarcodeDetector({formats:['qr_code']}).detect(cv);return r&&r[0]?{data:r[0].rawValue}:null}catch(e){return null}};
@@ -279,31 +286,50 @@ let qrP=null;const ensureQR=()=>qrP||(qrP=new Promise(res=>{try{if(typeof jsQR==
  const u=['https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js','https://unpkg.com/jsqr@1.4.0/dist/jsQR.js','https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js'];let i=0;
  const nx=()=>{if(typeof jsQR==='function'||i>=u.length)return res();const sc=document.createElement('script');sc.src=u[i++];const t=setTimeout(nx,6000);
   sc.onload=()=>{clearTimeout(t);typeof jsQR==='function'?res():nx()};sc.onerror=()=>{clearTimeout(t);nx()};try{document.head.appendChild(sc)}catch(e){clearTimeout(t);nx()}};nx()}catch(e){res()}}));
-async function proc(src,sw,sh,quiet){
+/* ===== বার্তা/শব্দ: স্ক্যান শেষ হলে বোঝার জন্য ===== */
+let AC=null,TT=0,tries=0,lastSig='',pauseUntil=0;
+const unlock=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume&&AC.resume()}catch(e){}};
+function beep(){try{unlock();[0,.2].forEach((t,i)=>{const o=AC.createOscillator(),g=AC.createGain(),T=AC.currentTime+t;o.frequency.value=i?1320:988;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.3,T);g.gain.exponentialRampToValueAtTime(.001,T+.16);o.start(T);o.stop(T+.17)})}catch(e){}}
+function toast(t,sub,bad){const el=$('toast');el.style.background=bad?'#dc2626':'#16a34a';el.innerHTML=`<b style="font-size:19px">${t}</b>${sub?'<br>'+sub:''}`;el.style.display='block';clearTimeout(TT);TT=setTimeout(()=>el.style.display='none',6000)}
+$('toast').onclick=()=>$('toast').style.display='none';
+function done(){if(!last)return;beep();try{navigator.vibrate&&navigator.vibrate([150,70,150])}catch(e){}
+ const b=$('res').querySelector('.big');
+ toast('✅ স্ক্যান সম্পূর্ণ হয়েছে',`রেজি. নং: ${esc($('reg').value||'—')} &nbsp;|&nbsp; সেট: ${esc(String(last.code))}<br>${b?esc(b.textContent):''}`);
+ if(!stream)$('res').scrollIntoView({behavior:'smooth',block:'start'})}
+
+/* চার কোণের মার্কার থেকে সঠিক পারস্পেকটিভ ম্যাপিং (ছবি বাঁকা/কোণাকুনি হলেও বৃত্ত ঠিক জায়গায় পড়ে) */
+function homog(S,D){const A=[],b=[];
+ for(let i=0;i<4;i++){const[x,y]=S[i],[u,v]=D[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v)}
+ const n=8;for(let i=0;i<n;i++){let q=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[q][i]))q=r;[A[i],A[q]]=[A[q],A[i]];[b[i],b[q]]=[b[q],b[i]];
+  for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
+ const h=Array(n);for(let i=n-1;i>=0;i--){let s=b[i];for(let c=i+1;c<n;c++)s-=A[i][c]*h[c];h[i]=s/A[i][i]}
+ return(x,y)=>{const w=h[6]*x+h[7]*y+1;return[(h[0]*x+h[1]*y+h[2])/w,(h[3]*x+h[4]*y+h[5])/w]}}
+async function proc(src,sw,sh,quiet,live){
  await ensureQR();
- const fail=m=>{if(!quiet)err(m);else if(stream)$('res').innerHTML='<small>⏳ '+m+'</small>';return false},k=Math.min(1,1600/Math.max(sw,sh)),W=Math.round(sw*k),H=Math.round(sh*k);
+ const fail=m=>{if(live)$('cst').textContent='🔍 '+m;else if(!quiet)err(m);return false},k=Math.min(1,1800/Math.max(sw,sh)),W=Math.round(sw*k),H=Math.round(sh*k);
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,W,H);
- const d=x.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);let sum=0;
- for(let i=0;i<W*H;i++){g[i]=d[4*i]*.3+d[4*i+1]*.59+d[4*i+2]*.11;sum+=g[i]}
- const mean=sum/(W*H),gb=boxBlur(g,W,H,Math.max(1,Math.round(W/450))),cand=[],re=Math.max(1,Math.round(W/190));let cn=null;
+ const d=x.getImageData(0,0,W,H).data,g8=new Uint8Array(W*H);let sum=0;
+ for(let i=0;i<W*H;i++){g8[i]=d[4*i]*.3+d[4*i+1]*.59+d[4*i+2]*.11;sum+=g8[i]}
+ const mean=sum/(W*H),gb=boxBlur(g8,W,H,Math.max(1,Math.round(W/450))),cand=[],re=Math.max(1,Math.round(W/190));let cn=null;
  /* কোণার মার্কার: ঝাপসা/হাফটোন মার্কারও ধরতে একাধিক থ্রেশহোল্ড ধাপে ধাপে চেষ্টা */
- for(const er of[0,re]){cand.length=0;/* er=0: সাধারণ; না পেলে er=re: সংকুচিত মাস্ক, যাতে QR-এর সাথে লেগে থাকা মার্কার আলাদা হয় */
- for(const f of[.5,.6,.7,.8,.88]){const T=mean*f,dm=new Uint8Array(W*H);for(let i=0;i<W*H;i++)dm[i]=gb[i]<=T?1:0;
-  const em=er?erode(dm,W,H,er):dm,vis=new Uint8Array(W*H);
-  for(let s0=0;s0<W*H;s0++){if(vis[s0]||!em[s0])continue;const stk=[s0];vis[s0]=1;let a=0,sx=0,sy=0,x0=W,x1=0,y0=H,y1=0;
-   while(stk.length){const p=stk.pop(),px=p%W,py=(p/W)|0;a++;sx+=px;sy+=py;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
-    for(const q of[px>0?p-1:-1,px<W-1?p+1:-1,py>0?p-W:-1,py<H-1?p+W:-1])if(q>=0&&!vis[q]&&em[q]){vis[q]=1;stk.push(q)}}
-   const ew=x1-x0+1,eh=y1-y0+1,w=ew+2*er,h=eh+2*er;
-   if(w>.008*W&&w<.09*W&&h>.008*W&&h<.09*W&&a/(ew*eh)>.72&&Math.abs(ew/eh-1)<.4){const cx=sx/a,cy=sy/a;if(!cand.some(q=>Math.hypot(q[0]-cx,q[1]-cy)<.007*W))cand.push([cx,cy,(w+h)/2])}}
-  if(cand.length>=4){const c4=pickCorners(cand);if(okCorners(c4)){cn=c4;break}}}
- if(cn)break}
- if(!cn)return fail(cand.length<4?'চার কোণের কালো মার্কার পাওয়া যায়নি। পুরো শিট ছবিতে রেখে আবার তুলুন।':'শুধু ছেঁড়া OMR অংশটি লম্বালম্বি করে ফ্রেমে রাখুন; চার কোণের কালো বর্গ স্পষ্ট দেখা যেতে হবে।');
- const mp=(lx,ly)=>{const u=(lx-18)/300,v=(ly-22)/750,[a,b,c2,e2]=cn;return[(1-v)*((1-u)*a[0]+u*b[0])+v*((1-u)*c2[0]+u*e2[0]),(1-v)*((1-u)*a[1]+u*b[1])+v*((1-u)*c2[1]+u*e2[1])]};
+ for(const er of[0,re]){cand.length=0;
+  for(const f of[.5,.6,.7,.8,.88]){const T=mean*f,dm=new Uint8Array(W*H);for(let i=0;i<W*H;i++)dm[i]=gb[i]<=T?1:0;
+   const em=er?erode(dm,W,H,er):dm,vis=new Uint8Array(W*H);
+   for(let s0=0;s0<W*H;s0++){if(vis[s0]||!em[s0])continue;const stk=[s0];vis[s0]=1;let a=0,sx=0,sy=0,x0=W,x1=0,y0=H,y1=0;
+    while(stk.length){const p=stk.pop(),px=p%W,py=(p/W)|0;a++;sx+=px;sy+=py;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
+     for(const q of[px>0?p-1:-1,px<W-1?p+1:-1,py>0?p-W:-1,py<H-1?p+W:-1])if(q>=0&&!vis[q]&&em[q]){vis[q]=1;stk.push(q)}}
+    const ew=x1-x0+1,eh=y1-y0+1,w=ew+2*er,h=eh+2*er;
+    if(w>.008*W&&w<.09*W&&h>.008*W&&h<.09*W&&a/(ew*eh)>.72&&Math.abs(ew/eh-1)<.4){const cx=sx/a,cy=sy/a;if(!cand.some(q=>Math.hypot(q[0]-cx,q[1]-cy)<.007*W))cand.push([cx,cy,(w+h)/2])}}
+   if(cand.length>=4){const c4=pickCorners(cand);if(okCorners(c4)){cn=c4;break}}}
+  if(cn)break}
+ if(!cn)return fail(cand.length<4?'চার কোণের কালো মার্কার পাওয়া যায়নি। ছেঁড়া OMR অংশটি পুরো ফ্রেমে রেখে, আলো ঠিক করে ধরুন।':'শুধু ছেঁড়া OMR অংশটি লম্বালম্বি সোজা করে ফ্রেমে রাখুন; চার কোণের কালো বর্গ স্পষ্ট দেখা যেতে হবে।');
+ let lay=Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/Math.hypot(cn[2][0]-cn[0][0],cn[2][1]-cn[0][1])>.465?2:1,G=GEO[lay];
+ const mkMp=G=>homog([[G.mx,G.my],[G.mx+G.mw,G.my],[G.mx,G.my+G.mh],[G.mx+G.mw,G.my+G.mh]],cn.map(p=>[p[0],p[1]]));let mp=mkMp(G);
  /* QR: আগে পুরো ছবিতে, না পেলে মূল রেজোলিউশন থেকে QR অংশ কেটে বড় করে পড়া */
  let code=qr_(d,W,H);
  if(!isOMR(code))code=await nativeQR(c);
  if(!isOMR(code)){code=null;
-  const pts=[[214,16],[330,16],[214,124],[330,124]].map(([lx,ly])=>mp(lx,ly).map(v=>v/k)),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),
+  const pts=G.qr.map(([lx,ly])=>mp(lx,ly).map(v=>v/k)),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),
    qx0=Math.max(0,Math.min(...xs)),qy0=Math.max(0,Math.min(...ys)),cw=Math.min(sw,Math.max(...xs))-qx0,ch=Math.min(sh,Math.max(...ys))-qy0;
   if(cw>8&&ch>8)for(const tgt of[500,800]){const sc=tgt/Math.max(cw,ch),qw=Math.round(cw*sc),qh=Math.round(ch*sc),qc=document.createElement('canvas');qc.width=qw;qc.height=qh;
    const qx=qc.getContext('2d',{willReadFrequently:true});qx.imageSmoothingEnabled=true;qx.fillStyle='#fff';qx.fillRect(0,0,qw,qh);qx.drawImage(src,qx0,qy0,cw,ch,0,0,qw,qh);
@@ -312,30 +338,57 @@ async function proc(src,sw,sh,quiet){
    let mn=255,mx=0;const gv=new Float32Array(qw*qh);for(let i=0;i<qw*qh;i++){const v=q[4*i]*.3+q[4*i+1]*.59+q[4*i+2]*.11;gv[i]=v;if(v<mn)mn=v;if(v>mx)mx=v}
    const th=(mn+mx)/2;for(let i=0;i<qw*qh;i++){const b=gv[i]<th?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
    r=qr_(q,qw,qh);if(isOMR(r)){code=r;break}
-   const g8=new Uint8Array(qw*qh);for(let i=0;i<qw*qh;i++)g8[i]=gv[i];const lb=boxBlur(g8,qw,qh,Math.max(6,Math.round(qw/25)));
-   for(const fct of[.92,.8]){for(let i=0;i<qw*qh;i++){const b=g8[i]<lb[i]*fct?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
+   const gq=new Uint8Array(qw*qh);for(let i=0;i<qw*qh;i++)gq[i]=gv[i];const lb2=boxBlur(gq,qw,qh,Math.max(6,Math.round(qw/25)));
+   for(const fct of[.92,.8]){for(let i=0;i<qw*qh;i++){const b=gq[i]<lb2[i]*fct?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
     r=qr_(q,qw,qh);if(isOMR(r)){code=r;break}}
    if(isOMR(r)){code=r;break}}}
- let sc,n,ky,fm;
- if(isOMR(code))[,sc,n,ky,fm]=code.data.split('|');
+ let sc,n,ky,fm,lv;
+ if(isOMR(code)){[,sc,n,ky,fm,lv]=code.data.split('|');lay=lv==='2'?2:1}
  else{const mc=($('fset').value||'').trim(),rec=mc&&SETS[mc];
-  if(!rec)return fail(mc?'এই সেট নং এই ব্রাউজারে নেই; নম্বর ঠিক আছে কিনা দেখুন।':'QR পড়া যায়নি। ওপরের "সেট নং" ঘরে শিটের সেট নং (যেমন 330777) লিখে আবার স্ক্যান করুন।');
-  const qq=rec.qs||rec;sc=mc;n=String(qq.length);ky=qq.map(q=>q.a+1).join('');fm=rec.meta&&rec.meta.fm}
- const R=4.5*Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/300,T2=mean*.72;
- const fill=(px,py)=>{let t=0,q=0;const r=Math.ceil(R);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>R*R)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;if(g[Y*W+X]<T2)t++}return q?t/q:0};
- const res=[];for(let i=0;i<+n;i++){const m=[];for(let j=0;j<4;j++){const[lx,ly]=pos(i,j),[px,py]=mp(lx,ly);if(fill(px,py)>.55)m.push(j)}res.push(m.length==0?-1:m.length==1?m[0]:4)}
- let reg='';for(let k2=0;k2<7;k2++){const ds=[];for(let dd=0;dd<10;dd++){const[lx,ly]=RG(k2,dd),[px,py]=mp(lx,ly);if(fill(px,py)>.55)ds.push(dd)}reg+=ds.length==1?ds[0]:'?'}
- $('reg').value=reg;last={code:sc,n:+n,key:ky,res,fm:+fm||+n,id:Date.now()};show();return true}
+  if(!rec)return fail(mc?'এই সেট নং এই ব্রাউজারে নেই; নম্বর ঠিক আছে কিনা দেখুন।':'QR পড়া যায়নি। QR অংশ স্পষ্ট করে ধরুন, অথবা ওপরের "সেট নং" ঘরে শিটের সেট নং (যেমন 330777) লিখে আবার স্ক্যান করুন।');
+  const qq=rec.qs||rec;sc=mc;n=String(qq.length);ky=qq.map(q=>q.a+1).join('');fm=rec.meta&&rec.meta.fm;lay=rec.lay||1}
+ G=GEO[lay];mp=mkMp(G);
+ /* বৃত্ত পড়া: স্থানীয় ব্যাকগ্রাউন্ডের সাথে তুলনা (ছায়া/আলোর তারতম্য সামলায়), ভরাটের অনুপাত দিয়ে সিদ্ধান্ত */
+ const nn=+n,bd=G.bd(nn),scl=Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/G.mw,R=Math.max(2,.33*bd*scl),
+  lb=boxBlur(g8,W,H,Math.max(8,Math.round(W/24)));
+ const fill=(px,py)=>{let t=0,q=0;const r=Math.ceil(R);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>R*R)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;const i=Y*W+X;if(g8[i]<lb[i]*.76)t++}return q?t/q:0};
+ const AS=[],RS=[],all=[];
+ for(let i=0;i<nn;i++){const s=[];for(let j=0;j<4;j++){const[lx,ly]=G.pos(i,j,nn),[px,py]=mp(lx,ly);s.push(fill(px,py))}AS.push(s);all.push(...s)}
+ for(let k2=0;k2<7;k2++){const s=[];for(let dd=0;dd<10;dd++){const[lx,ly]=G.rg(k2,dd),[px,py]=mp(lx,ly);s.push(fill(px,py))}RS.push(s);all.push(...s)}
+ all.sort((a,b)=>a-b);const base=all[all.length>>1]||0,thr=Math.max(.28,base+.18);
+ const pick=s=>{const mx=Math.max(...s);if(mx<thr)return[];return s.map((v,j)=>v>=thr&&v>=.6*mx?j:-1).filter(j=>j>=0)};
+ /* দেখার জন্য প্রিভিউ: কোণ ও শনাক্ত হওয়া বৃত্ত চিহ্নিত */
+ const xs2=cn.map(p=>p[0]),ys2=cn.map(p=>p[1]),pad=24,X0=Math.max(0,Math.min(...xs2)-pad),Y0=Math.max(0,Math.min(...ys2)-pad),X1=Math.min(W,Math.max(...xs2)+pad),Y1=Math.min(H,Math.max(...ys2)+pad),ps=Math.min(1,560/(X1-X0)),
+  pv=document.createElement('canvas');pv.width=Math.max(1,Math.round((X1-X0)*ps));pv.height=Math.max(1,Math.round((Y1-Y0)*ps));
+ pv.style.cssText='width:100%;max-width:440px;border:1px solid var(--bd);border-radius:8px;margin-top:8px;display:block';
+ const pc=pv.getContext('2d');pc.drawImage(c,X0,Y0,X1-X0,Y1-Y0,0,0,pv.width,pv.height);
+ const ring=(px,py,col)=>{pc.beginPath();pc.arc((px-X0)*ps,(py-Y0)*ps,Math.max(3,R*1.45*ps),0,7);pc.strokeStyle=col;pc.lineWidth=2;pc.stroke()};
+ cn.forEach(p=>ring(p[0],p[1],'#16a34a'));
+ const res=[];for(let i=0;i<nn;i++){const m=pick(AS[i]);res.push(m.length==0?-1:m.length==1?m[0]:4);
+  m.forEach(j=>{const[lx,ly]=G.pos(i,j,nn),[px,py]=mp(lx,ly);ring(px,py,m.length==1?'#16a34a':'#f59e0b')})}
+ let reg='';for(let k2=0;k2<7;k2++){const m=pick(RS[k2]);reg+=m.length==1?m[0]:'?';
+  if(m.length==1){const[lx,ly]=G.rg(k2,m[0]),[px,py]=mp(lx,ly);ring(px,py,'#2563eb')}
+  else{const[lx,ly]=G.rg(k2,0),[px,py]=mp(lx-14,ly);pc.fillStyle='#dc2626';pc.font='bold 15px sans-serif';pc.fillText('?',(px-X0)*ps-4,(py-Y0)*ps+5)}}
+ const sig=sc+'|'+reg+'|'+res.join('');
+ if(live&&sig===lastSig)return 'dup';
+ lastSig=sig;
+ $('reg').value=reg;last={code:sc,n:nn,key:ky,res,fm:+fm||nn,id:Date.now(),pv};show();return true}
 let stream=null,timer=null,busy=false;
-function stopCam(){clearInterval(timer);timer=null;stream&&stream.getTracks().forEach(t=>t.stop());stream=null;$('vid').style.display='none';$('cam').textContent='ক্যামেরা চালু করুন'}
-const snap=async q=>{const v=$('vid');if(busy||!stream||!v.videoWidth)return;busy=true;try{if(await proc(v,v.videoWidth,v.videoHeight,q))stopCam()}catch(e){if(!q)err('স্ক্যান ব্যর্থ: '+e.message)}busy=false};
-$('cam').onclick=async()=>{if(stream)return stopCam();
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false})}
- catch(e){return err('ক্যামেরা চালু হয়নি ('+e.name+')। অনুমতি দিন বা লিংকটি Chrome এ খুলুন; না হলে নিচের "ছবি তুলে স্ক্যান" বা "হাতে লিখে এন্ট্রি" ব্যবহার করুন।')}
- const v=$('vid');v.srcObject=stream;v.style.display='block';await v.play();$('cam').textContent='ক্যামেরা বন্ধ করুন';
- $('res').textContent='ছেঁড়া OMR অংশটি লম্বালম্বি সোজা করে ধরুন — চার কোণের কালো বর্গ ও QR স্পষ্ট দেখা গেলে নিজে থেকেই স্ক্যান হবে…';
- timer=setInterval(()=>snap(true),1500)};
-$('snap').onclick=()=>stream?snap(false):err('আগে ক্যামেরা চালু করুন।');
+function stopCam(){clearInterval(timer);timer=null;stream&&stream.getTracks().forEach(t=>t.stop());stream=null;$('vw').style.display='none';$('cam').textContent='📷 ক্যামেরায় সরাসরি স্ক্যান';$('cst').textContent=''}
+const snap=async q=>{const v=$('vid');if(busy||!stream||!v.videoWidth)return;busy=true;
+ try{const r=await proc(v,v.videoWidth,v.videoHeight,q,q);
+  if(r===true){if($('cont').checked){pauseUntil=Date.now()+3500;$('cst').textContent='✅ স্ক্যান সম্পূর্ণ — পরের শিট সামনে ধরুন';done()}else{stopCam();done()}}
+  else if(r==='dup')$('cst').textContent='✅ এই শিট আগেই স্ক্যান হয়েছে — পরের শিট সামনে ধরুন'}
+ catch(e){if(!q)err('স্ক্যান ব্যর্থ: '+e.message)}busy=false};
+$('cam').onclick=async()=>{unlock();if(stream)return stopCam();
+ try{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},audio:false})}
+  catch(e){if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))throw e;stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false})}}
+ catch(e){stream=null;return err('ক্যামেরা চালু হয়নি ('+((e&&e.name)||'')+')। ব্রাউজারে ক্যামেরার অনুমতি দিন বা লিংকটি Chrome এ খুলুন; না হলে নিচের \"ছবি তুলে স্ক্যান\" বা \"হাতে লিখে এন্ট্রি\" ব্যবহার করুন।')}
+ try{const tr=stream.getVideoTracks()[0],cp=tr.getCapabilities?tr.getCapabilities():{};if(cp.focusMode&&cp.focusMode.includes('continuous'))await tr.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}
+ const v=$('vid');v.srcObject=stream;$('vw').style.display='block';try{await v.play()}catch(e){}$('cam').textContent='⏹ ক্যামেরা বন্ধ করুন';
+ tries=0;lastSig='';pauseUntil=0;$('res').innerHTML='<small>ছেঁড়া OMR অংশটি লম্বালম্বি সোজা করে সবুজ ফ্রেমের ভেতরে ধরুন — চার কোণের কালো বর্গ ও QR স্পষ্ট দেখা গেলে নিজে থেকেই স্ক্যান হবে; স্ক্যান শেষ হলে সবুজ বার্তা ও বিপ শব্দ আসবে।</small>';
+ timer=setInterval(()=>{if(Date.now()<pauseUntil||busy)return;tries++;if(!$('cst').textContent.startsWith('✅'))$('cst').textContent='🔍 স্ক্যান চলছে… ('+bn(tries)+')';else $('cst').textContent='🔍 স্ক্যান চলছে… ('+bn(tries)+')';snap(true)},1000)};
+$('snap').onclick=()=>{unlock();stream?snap(false):err('আগে ক্যামেরা চালু করুন।')};
 $('neg').onchange=()=>last&&show();
 
 let RES=[],armed=0;try{RES=JSON.parse(localStorage.getItem('omrres')||'[]')}catch(e){}
@@ -355,12 +408,14 @@ renderList();
 
 const parseAns=t=>[...t.replace(/\s+/g,'')].map(ch=>{const a=aIdx(ch);return a===undefined?-1:a});
 const loadImg=f=>createImageBitmap(f).catch(()=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{im.width=im.naturalWidth;im.height=im.naturalHeight;ok(im)};im.onerror=()=>no(new Error('img'));im.src=u}));
-async function scanFiles(files){files=[...files];const n=files.length;if(!n)return;let ok=0;const bad=[];
+async function scanFiles(files){unlock();files=[...files];const n=files.length;if(!n)return;let ok=0;const bad=[];
  for(let i=0;i<n;i++){$('res').textContent=`স্ক্যান হচ্ছে… ${i+1}/${n}`;await tick();
-  try{const im=await loadImg(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1))ok++;else bad.push(i+1)}
+  try{const im=await loadImg(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1,false))ok++;else bad.push(i+1)}
   catch(x){bad.push(i+1);if(n==1)err('ছবি পড়া যায়নি: '+(x&&x.message||x))}}
  if(n>1){const m=`${n}টি ছবির মধ্যে ${ok}টি স্ক্যান হয়েছে।`+(bad.length?` ব্যর্থ ছবি নং: ${bad.join(', ')} (আরও স্পষ্ট ছবি লাগবে; চার কোণ ও QR দেখা যেতে হবে)।`:'');
-  if(ok)$('res').insertAdjacentHTML('afterbegin',`<p><b>${m}</b> সবগুলোর ফলাফল নিচের তালিকায় জমা হয়েছে; শেষটির বিস্তারিত এখানে।</p>`);else err(m)}}
+  toast(ok?`✅ ${bn(ok)}টি স্ক্যান সম্পূর্ণ`:'⚠️ স্ক্যান হয়নি',`${bn(n)}টি ছবির মধ্যে ${bn(ok)}টি সফল`+(bad.length?`, ব্যর্থ: ${bad.join(', ')}`:''),!ok);if(ok){beep();try{navigator.vibrate&&navigator.vibrate([150,70,150])}catch(e){}}
+  if(ok)$('res').insertAdjacentHTML('afterbegin',`<p><b>${m}</b> সবগুলোর ফলাফল নিচের তালিকায় জমা হয়েছে; শেষটির বিস্তারিত এখানে।</p>`);else err(m)}
+ if(n==1&&ok)done();else if(n==1)toast('⚠️ স্ক্যান সম্পূর্ণ হয়নি','কারণ নিচে লেখা আছে — আবার চেষ্টা করুন',true);$('res').scrollIntoView({behavior:'smooth',block:'start'})}
 $('pic').onchange=e=>{scanFiles(e.target.files);e.target.value=''};
 $('gal').onchange=e=>{scanFiles(e.target.files);e.target.value=''};
 $('mgo').onclick=()=>{const code=$('mset').value.trim(),rec=SETS[code];let ky,fm;
@@ -370,7 +425,7 @@ $('mgo').onclick=()=>{const code=$('mset').value.trim(),rec=SETS[code];let ky,fm
  const n=ky.length,res=parseAns($('mans').value);
  if(!/^[1-4]+$/.test(ky))return err('উত্তরমালায় শুধু ক খ গ ঘ থাকতে হবে।');
  if(res.length!=n)return err(`${n}টি উত্তর লাগবে, আপনি ${res.length}টি দিয়েছেন (ফাঁকা হলে - দিন)।`);
- last={code:code||'manual',n,key:ky,res,fm:+fm||n,id:Date.now()};show()};
+ last={code:code||'manual',n,key:ky,res,fm:+fm||n,id:Date.now()};show();done()};
 
 function chipPage(code,n,ky,res,sum){
  const cells=[...Array(n)].map((_,i)=>{const r=res[i],k=+ky[i]-1;let a;
@@ -389,6 +444,7 @@ function show(){const{code,n,key:ky,res,fm}=last,mark=fm/n,neg=+$('neg').value;l
  const tot=c*mark-w*neg,tt=`${+tot.toFixed(2)}/${+(n*mark).toFixed(2)}`,reg=$('reg').value.trim();
  try{const o=RES.find(x=>x.id==last.id)||{},tv=+tot.toFixed(2);upsert({id:last.id,reg,name:$('stn').value.trim(),set:code,c,w,b,tot:tv,full:+(n*mark).toFixed(2),tt,a:res.slice(),neg,pr:o.pr,sy:o.sy&&o.reg===reg&&o.tot===tv&&o.neg===neg?1:0,en:o.en});queueRes()}catch(e){console.warn(e)}
  $('res').innerHTML=`<p class=mu>সেট: <b>${code}</b> | রেজি. নং: <b>${esc(reg)||'—'}</b></p>${/^\d{7}$/.test(reg)?'':'<small style="color:#c33">রেজি. নং পুরোটা পড়া যায়নি (ফাঁকা/একাধিক বৃত্ত)। উপরের ঘরে ঠিক করে দিন।</small>'}<div class=big>প্রাপ্ত নম্বর: ${tt}</div><p>সঠিক ${c} | ভুল ${w} | ফাঁকা ${b}<br><small>${c}×${+mark.toFixed(3)} − ${w}×${neg}</small></p><button id="rp">সমাধান শিট PDF ডাউনলোড (সবুজ/লাল)</button><span id="rs" class=mu></span>${SETS[code]?'':'<br><small>এই সেটের প্রশ্ন এই ব্রাউজারে নেই, তাই শুধু উত্তরের তালিকাসহ সমাধান শিট হবে।</small>'}<div class=chips>${ch}</div>`;
+ if(last.pv){const cap=document.createElement('small');cap.textContent='শনাক্ত হওয়া বৃত্ত (সবুজ=উত্তর, নীল=রেজি. অঙ্ক, কমলা=একাধিক, লাল ?=পড়া যায়নি):';$('res').appendChild(cap);$('res').appendChild(last.pv)}
  $('rp').onclick=async()=>{$('rp').disabled=true;$('rs').textContent=' তৈরি হচ্ছে…';await document.fonts.load('14px "Noto Sans Bengali"');await tick();
   const sum=`নাম: ${esc($('stn').value)||'................'} | রেজি. নং: ${esc($('reg').value)||'.......'}<br>সঠিক: ${c} | ভুল: ${w} | ফাঁকা: ${b} | প্রাপ্ত নম্বর: ${tt}`;
   try{const rec=SETS[code];await loadFont(rec&&rec.meta&&rec.meta.font);
