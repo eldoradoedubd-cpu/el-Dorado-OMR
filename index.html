@@ -256,26 +256,49 @@ $('dlzip').onclick=()=>zipBlob&&dl(zipName,zipBlob);
 $('dlkey').onclick=()=>keyText&&dl('answer_keys.csv',keyText);
 
 function err(m){$('res').innerHTML=`<p style="color:#c33">${m}</p>`}
+function boxBlur(g,W,H,r){const t=new Float32Array(W*H),o=new Uint8Array(W*H),n=2*r+1,cl=(v,m)=>v<0?0:v>m?m:v;
+ for(let y=0;y<H;y++){const b=y*W;let s=0;for(let i=-r;i<=r;i++)s+=g[b+cl(i,W-1)];
+  for(let i=0;i<W;i++){t[b+i]=s/n;s+=g[b+cl(i+r+1,W-1)]-g[b+cl(i-r,W-1)]}}
+ for(let i=0;i<W;i++){let s=0;for(let y=-r;y<=r;y++)s+=t[cl(y,H-1)*W+i];
+  for(let y=0;y<H;y++){o[y*W+i]=s/n;s+=t[cl(y+r+1,H-1)*W+i]-t[cl(y-r,H-1)*W+i]}}
+ return o}
+const pickCorners=P=>{const f=fn=>P.reduce((b,p)=>!b||fn(p)<fn(b)?p:b,null);return[f(p=>p[0]+p[1]),f(p=>p[1]-p[0]),f(p=>p[0]-p[1]),f(p=>-(p[0]+p[1]))]};
+const okCorners=cn=>{if(cn.some(p=>!p))return false;const[a,b,c,e]=cn,rw=Math.hypot(b[0]-a[0],b[1]-a[1]),rh=Math.hypot(c[0]-a[0],c[1]-a[1]);
+ if(!rh||Math.abs(rw/rh-.4)>.14)return false;return Math.hypot(a[0]+e[0]-b[0]-c[0],a[1]+e[1]-b[1]-c[1])<.12*rh};
+const isOMR=c=>c&&c.data&&c.data.startsWith('OMR|');
 async function proc(src,sw,sh,quiet){
  const fail=m=>{if(!quiet)err(m);return false},k=Math.min(1,1600/Math.max(sw,sh)),W=Math.round(sw*k),H=Math.round(sh*k);
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,W,H);
- const d=x.getImageData(0,0,W,H).data,code=jsQR(d,W,H,{inversionAttempts:'attemptBoth'});
- if(!code||!code.data.startsWith('OMR|'))return fail('QR কোড পড়া যায়নি। আরও স্পষ্ট ও আলোকিত ছবি দিন।');
- const[,sc,n,ky,fm]=code.data.split('|'),g=new Uint8Array(W*H);let sum=0;
+ const d=x.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);let sum=0;
  for(let i=0;i<W*H;i++){g[i]=d[4*i]*.3+d[4*i+1]*.59+d[4*i+2]*.11;sum+=g[i]}
- const mean=sum/(W*H),T=mean*.55,vis=new Uint8Array(W*H),cand=[];
- for(let s0=0;s0<W*H;s0++){if(vis[s0]||g[s0]>T)continue;const stk=[s0];vis[s0]=1;let a=0,sx=0,sy=0,x0=W,x1=0,y0=H,y1=0;
-  while(stk.length){const p=stk.pop(),px=p%W,py=(p/W)|0;a++;sx+=px;sy+=py;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
-   for(const q of[px>0?p-1:-1,px<W-1?p+1:-1,py>0?p-W:-1,py<H-1?p+W:-1])if(q>=0&&!vis[q]&&g[q]<=T){vis[q]=1;stk.push(q)}}
-  const w=x1-x0+1,h=y1-y0+1;if(w>.008*W&&w<.09*W&&h>.008*W&&h<.09*W&&a/(w*h)>.8&&Math.abs(w/h-1)<.35)cand.push([sx/a,sy/a])}
- const cn=[[0,0],[W,0],[0,H],[W,H]].map(([cx,cy])=>cand.reduce((b,p)=>!b||Math.hypot(p[0]-cx,p[1]-cy)<Math.hypot(b[0]-cx,b[1]-cy)?p:b,null));
- if(cn.some(p=>!p)||new Set(cn.map(String)).size<4)return fail('চার কোণের কালো মার্কার পাওয়া যায়নি। পুরো শিট ছবিতে রেখে আবার তুলুন।');
-const rw=Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1]),rh=Math.hypot(cn[2][0]-cn[0][0],cn[2][1]-cn[0][1]);if(Math.abs(rw/rh-.4)>.14)return fail('শুধু ছেঁড়া OMR অংশটি লম্বালম্বি করে ফ্রেমে রাখুন; চার কোণের কালো বর্গ স্পষ্ট দেখা যেতে হবে।');
+ const mean=sum/(W*H),gb=boxBlur(g,W,H,Math.max(1,Math.round(W/450))),cand=[];let cn=null;
+ /* কোণার মার্কার: ঝাপসা/হাফটোন মার্কারও ধরতে একাধিক থ্রেশহোল্ড ধাপে ধাপে চেষ্টা */
+ for(const f of[.5,.6,.7,.8,.88]){const T=mean*f,vis=new Uint8Array(W*H);
+  for(let s0=0;s0<W*H;s0++){if(vis[s0]||gb[s0]>T)continue;const stk=[s0];vis[s0]=1;let a=0,sx=0,sy=0,x0=W,x1=0,y0=H,y1=0;
+   while(stk.length){const p=stk.pop(),px=p%W,py=(p/W)|0;a++;sx+=px;sy+=py;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
+    for(const q of[px>0?p-1:-1,px<W-1?p+1:-1,py>0?p-W:-1,py<H-1?p+W:-1])if(q>=0&&!vis[q]&&gb[q]<=T){vis[q]=1;stk.push(q)}}
+   const w=x1-x0+1,h=y1-y0+1;
+   if(w>.008*W&&w<.09*W&&h>.008*W&&h<.09*W&&a/(w*h)>.72&&Math.abs(w/h-1)<.4){const cx=sx/a,cy=sy/a;if(!cand.some(q=>Math.hypot(q[0]-cx,q[1]-cy)<.007*W))cand.push([cx,cy])}}
+  if(cand.length>=4){const c4=pickCorners(cand);if(okCorners(c4)){cn=c4;break}}}
+ if(!cn)return fail(cand.length<4?'চার কোণের কালো মার্কার পাওয়া যায়নি। পুরো শিট ছবিতে রেখে আবার তুলুন।':'শুধু ছেঁড়া OMR অংশটি লম্বালম্বি করে ফ্রেমে রাখুন; চার কোণের কালো বর্গ স্পষ্ট দেখা যেতে হবে।');
  const mp=(lx,ly)=>{const u=(lx-18)/300,v=(ly-22)/750,[a,b,c2,e2]=cn;return[(1-v)*((1-u)*a[0]+u*b[0])+v*((1-u)*c2[0]+u*e2[0]),(1-v)*((1-u)*a[1]+u*b[1])+v*((1-u)*c2[1]+u*e2[1])]};
+ /* QR: আগে পুরো ছবিতে, না পেলে মূল রেজোলিউশন থেকে QR অংশ কেটে বড় করে পড়া */
+ let code=jsQR(d,W,H,{inversionAttempts:'attemptBoth'});
+ if(!isOMR(code)){code=null;
+  const pts=[[226,16],[330,16],[226,124],[330,124]].map(([lx,ly])=>mp(lx,ly).map(v=>v/k)),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),
+   qx0=Math.max(0,Math.min(...xs)),qy0=Math.max(0,Math.min(...ys)),cw=Math.min(sw,Math.max(...xs))-qx0,ch=Math.min(sh,Math.max(...ys))-qy0;
+  if(cw>8&&ch>8)for(const tgt of[500,800]){const sc=tgt/Math.max(cw,ch),qw=Math.round(cw*sc),qh=Math.round(ch*sc),qc=document.createElement('canvas');qc.width=qw;qc.height=qh;
+   const qx=qc.getContext('2d',{willReadFrequently:true});qx.imageSmoothingEnabled=true;qx.fillStyle='#fff';qx.fillRect(0,0,qw,qh);qx.drawImage(src,qx0,qy0,cw,ch,0,0,qw,qh);
+   const id=qx.getImageData(0,0,qw,qh),q=id.data;let r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}
+   let mn=255,mx=0;const gv=new Float32Array(qw*qh);for(let i=0;i<qw*qh;i++){const v=q[4*i]*.3+q[4*i+1]*.59+q[4*i+2]*.11;gv[i]=v;if(v<mn)mn=v;if(v>mx)mx=v}
+   const th=(mn+mx)/2;for(let i=0;i<qw*qh;i++){const b=gv[i]<th?0:255;q[4*i]=q[4*i+1]=q[4*i+2]=b;q[4*i+3]=255}
+   r=jsQR(q,qw,qh,{inversionAttempts:'attemptBoth'});if(isOMR(r)){code=r;break}}}
+ if(!isOMR(code))return fail('QR কোড পড়া যায়নি। কাছে এনে, আলো ঠিক রেখে QR ও চার কোণ স্পষ্ট করে ছবি দিন।');
+ const[,sc,n,ky,fm]=code.data.split('|');
  const R=4.5*Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/300,T2=mean*.72;
  const fill=(px,py)=>{let t=0,q=0;const r=Math.ceil(R);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>R*R)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;if(g[Y*W+X]<T2)t++}return q?t/q:0};
  const res=[];for(let i=0;i<+n;i++){const m=[];for(let j=0;j<4;j++){const[lx,ly]=pos(i,j),[px,py]=mp(lx,ly);if(fill(px,py)>.55)m.push(j)}res.push(m.length==0?-1:m.length==1?m[0]:4)}
- let reg='';for(let k=0;k<7;k++){const ds=[];for(let d=0;d<10;d++){const[lx,ly]=RG(k,d),[px,py]=mp(lx,ly);if(fill(px,py)>.55)ds.push(d)}reg+=ds.length==1?ds[0]:'?'}
+ let reg='';for(let k2=0;k2<7;k2++){const ds=[];for(let dd=0;dd<10;dd++){const[lx,ly]=RG(k2,dd),[px,py]=mp(lx,ly);if(fill(px,py)>.55)ds.push(dd)}reg+=ds.length==1?ds[0]:'?'}
  $('reg').value=reg;last={code:sc,n:+n,key:ky,res,fm:+fm||+n,id:Date.now()};show();return true}
 let stream=null,timer=null,busy=false;
 function stopCam(){clearInterval(timer);timer=null;stream&&stream.getTracks().forEach(t=>t.stop());stream=null;$('vid').style.display='none';$('cam').textContent='ক্যামেরা চালু করুন'}
@@ -305,9 +328,10 @@ $('reg').oninput=$('stn').oninput=()=>last&&show();
 renderList();
 
 const parseAns=t=>[...t.replace(/\s+/g,'')].map(ch=>{const a=aIdx(ch);return a===undefined?-1:a});
+const loadImg=f=>createImageBitmap(f).catch(()=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{im.width=im.naturalWidth;im.height=im.naturalHeight;ok(im)};im.onerror=()=>no(new Error('img'));im.src=u}));
 async function scanFiles(files){files=[...files];const n=files.length;if(!n)return;let ok=0;const bad=[];
  for(let i=0;i<n;i++){$('res').textContent=`স্ক্যান হচ্ছে… ${i+1}/${n}`;await tick();
-  try{const im=await createImageBitmap(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1))ok++;else bad.push(i+1)}
+  try{const im=await loadImg(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1))ok++;else bad.push(i+1)}
   catch(x){bad.push(i+1);if(n==1)err('ছবি পড়া যায়নি।')}}
  if(n>1){const m=`${n}টি ছবির মধ্যে ${ok}টি স্ক্যান হয়েছে।`+(bad.length?` ব্যর্থ ছবি নং: ${bad.join(', ')} (আরও স্পষ্ট ছবি লাগবে; চার কোণ ও QR দেখা যেতে হবে)।`:'');
   if(ok)$('res').insertAdjacentHTML('afterbegin',`<p><b>${m}</b> সবগুলোর ফলাফল নিচের তালিকায় জমা হয়েছে; শেষটির বিস্তারিত এখানে।</p>`);else err(m)}}
