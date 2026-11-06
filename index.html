@@ -348,7 +348,7 @@ const loadImg=f=>createImageBitmap(f).catch(()=>new Promise((ok,no)=>{const u=UR
 async function scanFiles(files){files=[...files];const n=files.length;if(!n)return;let ok=0;const bad=[];
  for(let i=0;i<n;i++){$('res').textContent=`স্ক্যান হচ্ছে… ${i+1}/${n}`;await tick();
   try{const im=await loadImg(files[i]);if(n>1)$('stn').value='';if(await proc(im,im.width,im.height,n>1))ok++;else bad.push(i+1)}
-  catch(x){bad.push(i+1);if(n==1)err('ছবি পড়া যায়নি।')}}
+  catch(x){bad.push(i+1);if(n==1)err('ছবি পড়া যায়নি: '+(x&&x.message||x))}}
  if(n>1){const m=`${n}টি ছবির মধ্যে ${ok}টি স্ক্যান হয়েছে।`+(bad.length?` ব্যর্থ ছবি নং: ${bad.join(', ')} (আরও স্পষ্ট ছবি লাগবে; চার কোণ ও QR দেখা যেতে হবে)।`:'');
   if(ok)$('res').insertAdjacentHTML('afterbegin',`<p><b>${m}</b> সবগুলোর ফলাফল নিচের তালিকায় জমা হয়েছে; শেষটির বিস্তারিত এখানে।</p>`);else err(m)}}
 $('pic').onchange=e=>{scanFiles(e.target.files);e.target.value=''};
@@ -377,7 +377,7 @@ function show(){const{code,n,key:ky,res,fm}=last,mark=fm/n,neg=+$('neg').value;l
   if(r==-1){b++;t+=` ফাঁকা (${L[k]})`}else if(r==k){c++;cl='g';t+=` ${L[k]} ✓`}else{w++;cl='r';t+=` ${r==4?'একাধিক':L[r]} ✗ (${L[k]})`}
   ch+=`<span class="chip ${cl}">${t}</span>`}
  const tot=c*mark-w*neg,tt=`${+tot.toFixed(2)}/${+(n*mark).toFixed(2)}`,reg=$('reg').value.trim();
- {const o=RES.find(x=>x.id==last.id)||{},tv=+tot.toFixed(2);upsert({id:last.id,reg,name:$('stn').value.trim(),set:code,c,w,b,tot:tv,full:+(n*mark).toFixed(2),tt,a:res.slice(),neg,pr:o.pr,sy:o.sy&&o.reg===reg&&o.tot===tv&&o.neg===neg?1:0,en:o.en});queueRes()}
+ try{const o=RES.find(x=>x.id==last.id)||{},tv=+tot.toFixed(2);upsert({id:last.id,reg,name:$('stn').value.trim(),set:code,c,w,b,tot:tv,full:+(n*mark).toFixed(2),tt,a:res.slice(),neg,pr:o.pr,sy:o.sy&&o.reg===reg&&o.tot===tv&&o.neg===neg?1:0,en:o.en});queueRes()}catch(e){console.warn(e)}
  $('res').innerHTML=`<p class=mu>সেট: <b>${code}</b> | রেজি. নং: <b>${esc(reg)||'—'}</b></p>${/^\d{7}$/.test(reg)?'':'<small style="color:#c33">রেজি. নং পুরোটা পড়া যায়নি (ফাঁকা/একাধিক বৃত্ত)। উপরের ঘরে ঠিক করে দিন।</small>'}<div class=big>প্রাপ্ত নম্বর: ${tt}</div><p>সঠিক ${c} | ভুল ${w} | ফাঁকা ${b}<br><small>${c}×${+mark.toFixed(3)} − ${w}×${neg}</small></p><button id="rp">সমাধান শিট PDF ডাউনলোড (সবুজ/লাল)</button><span id="rs" class=mu></span>${SETS[code]?'':'<br><small>এই সেটের প্রশ্ন এই ব্রাউজারে নেই, তাই শুধু উত্তরের তালিকাসহ সমাধান শিট হবে।</small>'}<div class=chips>${ch}</div>`;
  $('rp').onclick=async()=>{$('rp').disabled=true;$('rs').textContent=' তৈরি হচ্ছে…';await document.fonts.load('14px "Noto Sans Bengali"');await tick();
   const sum=`নাম: ${esc($('stn').value)||'................'} | রেজি. নং: ${esc($('reg').value)||'.......'}<br>সঠিক: ${c} | ভুল: ${w} | ফাঁকা: ${b} | প্রাপ্ত নম্বর: ${tt}`;
@@ -387,7 +387,7 @@ function show(){const{code,n,key:ky,res,fm}=last,mark=fm/n,neg=+$('neg').value;l
   $('rp').disabled=false}}
 
 /* ===== পোর্টাল সংযোগ ===== */
-const sbc=supabase.createClient('https://dfusvqgexqgyhfeipupz.supabase.co','sb_publishable_KuUjIcU1mSSq8YBv61OtPw_RKlMDlOq',{auth:{storageKey:'omr-portal-auth'}});
+const sbc=(typeof supabase!=='undefined'&&supabase.createClient)?supabase.createClient('https://dfusvqgexqgyhfeipupz.supabase.co','sb_publishable_KuUjIcU1mSSq8YBv61OtPw_RKlMDlOq',{auth:{storageKey:'omr-portal-auth'}}):(()=>{const f=()=>new Proxy(function(){},{get:(_,k)=>k==='then'?(r=>r({data:null,error:{message:'offline'}})):f(),apply:()=>f()});return f()})();
 let ME=null,PM='',FB=false,RT=0,PEND={},CIDP='';
 try{PEND=JSON.parse(localStorage.getItem('omrpend')||'{}')}catch(e){}
 try{CIDP=JSON.parse(localStorage.getItem('omrmeta')||'{}').cid||''}catch(e){}
