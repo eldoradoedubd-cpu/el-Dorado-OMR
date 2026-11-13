@@ -148,20 +148,20 @@ const ageo=n=>{const G=n>75?4:n>40?3:2,rpg=Math.max(1,Math.ceil(n/G)),gw=388/G,h
 const GEO={
  1:{mx:18,my:22,mw:300,mh:750,bd:()=>13,rb:13,pos:(i,j)=>[12+Math.floor(i/25)*76+25.5+j*14.5,362+(i%25)*16],rg:(k,d)=>[216+k*15,203+d*14.5],qr:[[214,16],[330,16],[214,124],[330,124]]},
  2:{mx:22,my:22,mw:396,mh:750,bd:n=>ageo(n).bd,rb:14,pos:(i,j,n)=>{const A=ageo(n),g=Math.floor(i/A.rpg),r=i%A.rpg;return[26+g*A.gw+26+j*A.hs,336+r*A.vs]},rg:(k,d)=>[80+d*19,206+k*17],qr:[[306,28],[424,28],[306,142],[424,142]]}};
+GEO[3]={...GEO[2],rb:11,v:1,rg:(k,d)=>[82+k*24,203+d*12.8]};/* ৩: রেজি. নং এর প্রতি অঙ্কের ০–৯ বৃত্ত উপর থেকে নিচে */
 const key=s=>s.qs.map(q=>q.a+1).join('');
-function qr(s){const q=qrcode(0,'L');q.addData(`OMR|${s.code}|${s.qs.length}|${key(s)}|${(s.meta||{}).fm||s.qs.length}|2`);q.make();return q.createDataURL(6,6)}
+function qr(s){const q=qrcode(0,'L');q.addData(`OMR|${s.code}|${s.qs.length}|${key(s)}|${(s.meta||{}).fm||s.qs.length}|3`);q.make();return q.createDataURL(6,6)}
 function mk(code,meta){const qs=sh(Q.map((_,i)=>i)).map(i=>{const q=Q[i],p=sh([0,1,2,3]);return{t:q.t,o:p.map(k=>q.o[k]),a:p.indexOf(q.a)}});return{code,qs,meta}}
 
 function omrHTML(s){
- const m=s.meta||{},n=s.qs.length,G=GEO[2],bd=G.bd(n),rb=G.rb,A=ageo(n);
+ const m=s.meta||{},n=s.qs.length,G=GEO[3],bd=G.bd(n),rb=G.rb,A=ageo(n);
  let h='<div class=tear></div>'+[[22,22],[418,22],[22,772],[418,772]].map(([x,y])=>`<i class=mk style="left:${x-10}px;top:${y-10}px;width:20px;height:20px"></i>`).join('');
  h+=`<img src="${LOGO}" style="position:absolute;left:40px;top:38px;height:28px"><img class=qr style="left:316px;top:38px;width:96px;height:96px;image-rendering:auto" src="${qr(s)}">
 <div style="position:absolute;left:40px;top:72px;width:260px;line-height:1.3"><b style="font-size:12px">OMR উত্তরপত্র</b><br>সেট নং: <b style="font-size:17px;letter-spacing:1px">${s.code}</b></div>
 <div style="position:absolute;left:40px;top:116px;width:270px;font-size:9.5px;line-height:1.5"><div>পরীক্ষা: <b>${esc(m.ex||'')}</b></div><div>বিষয়: <b>${esc(m.sb||'')}</b> &nbsp; অধ্যায়: <b>${esc(m.ch||'')}</b></div><div>নাম: ..............................................</div></div>
-<div style="position:absolute;left:40px;top:160px;font-size:9px;font-weight:700">রেজি. নং (৭ অঙ্ক) — ঘরে লিখে, নিচে প্রতি সারিতে বৃত্ত ভরাট করুন</div>
-<div style="position:absolute;left:270px;top:176px;width:146px;font-size:7.5px;line-height:1.3"><b>নির্দেশনা:</b> ১. কালো/নীল বলপয়েন্টে বৃত্ত পুরো ভরাট করুন (পেন্সিল নয়)।<br>২. প্রতি প্রশ্নে একটিই বৃত্ত ভরাট করুন; কাটাকাটি করলে ভুল ধরা হবে।<br>৩. রেজি. নং এর প্রতি সারিতে একটি অঙ্কের বৃত্ত ভরাট করুন।<br>৪. কোণের কালো বর্গ ও QR এ কিছু লিখবেন না।<br>৫. সেট নং প্রশ্নপত্রের সাথে মিলিয়ে নিন।<br>৬. ডটেড লাইন বরাবর ছিঁড়ে জমা দিন।</div>`;
- for(let k=0;k<7;k++){h+=`<i class=rg style="position:absolute;left:${80+k*22-8}px;top:174px;width:16px;height:18px;margin:0"></i>`;
-  const y0=G.rg(k,0)[1];h+=`<span class=lb style="left:34px;top:${y0-6}px;width:36px;text-align:right;font:400 7.5px/12px 'Noto Sans Bengali',sans-serif">অঙ্ক ${bn(k+1)}</span>`;
+<div style="position:absolute;left:40px;top:160px;font-size:9px;font-weight:700">রেজি. নং (৭ অঙ্ক) — ঘরে লিখে, নিচে প্রতি কলামে বৃত্ত ভরাট করুন</div>
+<div style="position:absolute;left:270px;top:176px;width:146px;font-size:7.5px;line-height:1.3"><b>নির্দেশনা:</b> ১. কালো/নীল বলপয়েন্টে বৃত্ত পুরো ভরাট করুন (পেন্সিল নয়)।<br>২. প্রতি প্রশ্নে একটিই বৃত্ত ভরাট করুন; কাটাকাটি করলে ভুল ধরা হবে।<br>৩. রেজি. নং এর প্রতি কলামে একটি অঙ্কের বৃত্ত ভরাট করুন।<br>৪. কোণের কালো বর্গ ও QR এ কিছু লিখবেন না।<br>৫. সেট নং প্রশ্নপত্রের সাথে মিলিয়ে নিন।<br>৬. ডটেড লাইন বরাবর ছিঁড়ে জমা দিন।</div>`;
+ for(let k=0;k<7;k++){h+=`<i class=rg style="position:absolute;left:${G.rg(k,0)[0]-8}px;top:174px;width:16px;height:18px;margin:0"></i>`;
   for(let d=0;d<10;d++){const[x,y]=G.rg(k,d);h+=`<b class=bb style="left:${x-rb/2}px;top:${y-rb/2}px;width:${rb}px;height:${rb}px;font-size:7.5px">${d}</b>`}}
  s.qs.forEach((q,i)=>{const[bx,y]=G.pos(i,0,n);h+=`<span class=lb style="left:${bx-30}px;top:${y-6}px;width:18px;text-align:right;font:400 9px/12px 'Noto Sans Bengali',sans-serif">${i+1}</span>`;
   for(let j=0;j<4;j++){const[x,yy]=G.pos(i,j,n);h+=`<b class=bb style="left:${x-bd/2}px;top:${yy-bd/2}px;width:${bd}px;height:${bd}px;font-size:${Math.min(9,bd*.55)}px">${L[j]}</b>`}});
@@ -195,7 +195,7 @@ $('gen').onclick=async()=>{
  $('gen').disabled=true;await document.fonts.load('14px "Noto Sans Bengali"');await loadFont($('fnt').value);
  const n=Math.min(200,Math.max(1,+$('cnt').value|0)),meta=getMeta(),made=[],batch=Math.random().toString(36).slice(2,6).toUpperCase(),doc=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});try{localStorage.setItem('omrmeta',JSON.stringify(meta))}catch(e){}if(meta.cid)meta.eid='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);PM='';try{await takenCodes()}catch(e){}let keys='সেট,উত্তরমালা (ক=1 খ=2 গ=3 ঘ=4)\n';
  try{for(let i=0;i<n;i++){$('st').textContent=`তৈরি হচ্ছে… ${i+1}/${n}`;await tick();
-  const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta,lay:2};made.push(s.code);
+  const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta,lay:3};made.push(s.code);
   const pgs=paperPages(s);if(pgs.length%2){const b=document.createElement('div');b.className='pg';b.innerHTML='<div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:10px;color:#aaa">এই পৃষ্ঠা ইচ্ছাকৃতভাবে ফাঁকা</div>';$('stage').appendChild(b);pgs.push(b)}
   await toPDF(pgs,doc);keys+=`${s.code},${key(s)}\n`}
   try{localStorage.setItem('omrsets',JSON.stringify(SETS))}catch(e){}saveHist(meta,n);await pubAfterGen(meta,made);
@@ -343,18 +343,18 @@ async function proc(src,sw,sh,quiet,live){
     r=qr_(q,qw,qh);if(isOMR(r)){code=r;break}}
    if(isOMR(r)){code=r;break}}}
  let sc,n,ky,fm,lv;
- if(isOMR(code)){[,sc,n,ky,fm,lv]=code.data.split('|');lay=lv==='2'?2:1}
+ if(isOMR(code)){[,sc,n,ky,fm,lv]=code.data.split('|');lay=lv==='3'?3:lv==='2'?2:1}
  else{const mc=($('fset').value||'').trim(),rec=mc&&SETS[mc];
   if(!rec)return fail(mc?'এই সেট নং এই ব্রাউজারে নেই; নম্বর ঠিক আছে কিনা দেখুন।':'QR পড়া যায়নি। QR অংশ স্পষ্ট করে ধরুন, অথবা ওপরের "সেট নং" ঘরে শিটের সেট নং (যেমন 330777) লিখে আবার স্ক্যান করুন।');
   const qq=rec.qs||rec;sc=mc;n=String(qq.length);ky=qq.map(q=>q.a+1).join('');fm=rec.meta&&rec.meta.fm;lay=rec.lay||1}
  G=GEO[lay];mp=mkMp(G);
  /* বৃত্ত পড়া: স্থানীয় ব্যাকগ্রাউন্ডের সাথে তুলনা (ছায়া/আলোর তারতম্য সামলায়), ভরাটের অনুপাত দিয়ে সিদ্ধান্ত */
- const nn=+n,bd=G.bd(nn),scl=Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/G.mw,R=Math.max(2,.33*bd*scl),
+ const nn=+n,bd=G.bd(nn),scl=Math.hypot(cn[1][0]-cn[0][0],cn[1][1]-cn[0][1])/G.mw,R=Math.max(2,.33*bd*scl),Rr=Math.max(2,.33*G.rb*scl),
   lb=boxBlur(g8,W,H,Math.max(8,Math.round(W/24)));
- const fill=(px,py)=>{let t=0,q=0;const r=Math.ceil(R);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>R*R)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;const i=Y*W+X;if(g8[i]<lb[i]*.76)t++}return q?t/q:0};
+ const fill=(px,py,RR=R)=>{let t=0,q=0;const r=Math.ceil(RR);for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(xx*xx+yy*yy>RR*RR)continue;const X=Math.round(px+xx),Y=Math.round(py+yy);if(X<0||Y<0||X>=W||Y>=H)continue;q++;const i=Y*W+X;if(g8[i]<lb[i]*.76)t++}return q?t/q:0};
  const AS=[],RS=[],all=[];
  for(let i=0;i<nn;i++){const s=[];for(let j=0;j<4;j++){const[lx,ly]=G.pos(i,j,nn),[px,py]=mp(lx,ly);s.push(fill(px,py))}AS.push(s);all.push(...s)}
- for(let k2=0;k2<7;k2++){const s=[];for(let dd=0;dd<10;dd++){const[lx,ly]=G.rg(k2,dd),[px,py]=mp(lx,ly);s.push(fill(px,py))}RS.push(s);all.push(...s)}
+ for(let k2=0;k2<7;k2++){const s=[];for(let dd=0;dd<10;dd++){const[lx,ly]=G.rg(k2,dd),[px,py]=mp(lx,ly);s.push(fill(px,py,G.v?Rr:R))}RS.push(s);all.push(...s)}
  all.sort((a,b)=>a-b);const base=all[all.length>>1]||0,thr=Math.max(.28,base+.18);
  const pick=s=>{const mx=Math.max(...s);if(mx<thr)return[];return s.map((v,j)=>v>=thr&&v>=.6*mx?j:-1).filter(j=>j>=0)};
  /* দেখার জন্য প্রিভিউ: কোণ ও শনাক্ত হওয়া বৃত্ত চিহ্নিত */
@@ -368,7 +368,7 @@ async function proc(src,sw,sh,quiet,live){
   m.forEach(j=>{const[lx,ly]=G.pos(i,j,nn),[px,py]=mp(lx,ly);ring(px,py,m.length==1?'#16a34a':'#f59e0b')})}
  let reg='';for(let k2=0;k2<7;k2++){const m=pick(RS[k2]);reg+=m.length==1?m[0]:'?';
   if(m.length==1){const[lx,ly]=G.rg(k2,m[0]),[px,py]=mp(lx,ly);ring(px,py,'#2563eb')}
-  else{const[lx,ly]=G.rg(k2,0),[px,py]=mp(lx-14,ly);pc.fillStyle='#dc2626';pc.font='bold 15px sans-serif';pc.fillText('?',(px-X0)*ps-4,(py-Y0)*ps+5)}}
+  else{const[lx,ly]=G.rg(k2,0),[px,py]=mp(G.v?lx:lx-14,G.v?ly-10:ly);pc.fillStyle='#dc2626';pc.font='bold 15px sans-serif';pc.fillText('?',(px-X0)*ps-4,(py-Y0)*ps+5)}}
  const sig=sc+'|'+reg+'|'+res.join('');
  if(live&&sig===lastSig)return 'dup';
  lastSig=sig;
