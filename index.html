@@ -58,7 +58,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <label>প্রশ্নপত্রের ফন্ট</label><select id="fnt"></select><div id="fprev" style="font-size:17px;margin-top:4px">ক খ গ ঘ — বাংলা প্রশ্নের নমুনা ১২৩</div>
 <label>প্রশ্নের ফন্ট সাইজ</label><select id="fsz"><option value="0">স্বয়ংক্রিয় (কলাম অনুযায়ী)</option><option value="9">৯ (খুব ছোট)</option><option value="10">১০</option><option value="11">১১</option><option value="12">১২</option><option value="13">১৩</option><option value="14">১৪</option><option value="15">১৫</option><option value="16">১৬</option><option value="18">১৮ (বড়)</option></select>
 <label>প্রশ্নপত্রের সংখ্যা (সেট)</label><input type="number" id="cnt" value="5" min="1" max="200">
-<button id="gen">প্রশ্নপত্র তৈরি করুন</button><button class="s" id="dlzip" disabled>সব সেটের PDF ডাউনলোড</button><button class="s" id="dlkey" disabled>উত্তরমালা CSV</button>
+<label style="display:flex;gap:8px;align-items:flex-start;color:var(--tx);margin-top:10px"><input type="checkbox" id="duplex" checked style="width:auto;margin-top:6px"><span>দুই পিঠে প্রিন্ট/ফটোকপির জন্য (পেছনের পৃষ্ঠা ১৮০° ঘোরানো)<br><small>কপি মেশিনের সেটিং বদলাতে হবে না। শুধু পেছনের পিঠ উল্টো দেখাবে PDF-এ, প্রিন্টে সোজা আসবে।</small></span></label><button id="gen">প্রশ্নপত্র তৈরি করুন</button><button class="s" id="dlzip" disabled>সব সেটের PDF ডাউনলোড</button><button class="s" id="dlkey" disabled>উত্তরমালা CSV</button>
 <div id="st" class="mu"></div></div>
 
 <div class="c"><h2>📚 আগের প্রশ্নসমূহ (ইতিহাস)</h2>
@@ -185,8 +185,10 @@ function paperPages(s,res,sum){
    if(d.offsetTop+d.offsetHeight>cols[ci].clientHeight&&cols[ci].children.length>1){cols[ci].removeChild(d);if(ci<cn-1)ci++;else np(false);fill();cols[ci].appendChild(d)}});
  return pages}
 
-async function toPDF(pages,d){const own=!d;d=d||new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
- for(const pg of pages){const c=await html2canvas(pg,{scale:1.5,backgroundColor:'#fff'});if(d._u)d.addPage();d._u=1;d.addImage(c.toDataURL('image/jpeg',.85),'JPEG',0,0,297,210)}
+async function toPDF(pages,d,flip){const own=!d;d=d||new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
+ for(const pg of pages){let c=await html2canvas(pg,{scale:1.5,backgroundColor:'#fff'});const no=d._u?d.getNumberOfPages()+1:1;
+  if(flip&&no%2===0){const r=document.createElement('canvas');r.width=c.width;r.height=c.height;const x=r.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,r.width,r.height);x.translate(r.width,r.height);x.rotate(Math.PI);x.drawImage(c,0,0);c=r}
+  if(d._u)d.addPage();d._u=1;d.addImage(c.toDataURL('image/jpeg',.85),'JPEG',0,0,297,210)}
  $('stage').innerHTML='';return own?d.output('blob'):d}
 
 $('gen').onclick=async()=>{
@@ -197,7 +199,7 @@ $('gen').onclick=async()=>{
  try{for(let i=0;i<n;i++){$('st').textContent=`তৈরি হচ্ছে… ${i+1}/${n}`;await tick();
   const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta,lay:3};made.push(s.code);
   const pgs=paperPages(s);if(pgs.length%2){const b=document.createElement('div');b.className='pg';b.innerHTML='<div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:10px;color:#aaa">এই পৃষ্ঠা ইচ্ছাকৃতভাবে ফাঁকা</div>';$('stage').appendChild(b);pgs.push(b)}
-  await toPDF(pgs,doc);keys+=`${s.code},${key(s)}\n`}
+  await toPDF(pgs,doc,$('duplex').checked);keys+=`${s.code},${key(s)}\n`}
   try{localStorage.setItem('omrsets',JSON.stringify(SETS))}catch(e){}saveHist(meta,n);await pubAfterGen(meta,made);
   zipBlob=doc.output('blob');zipName=`question_sets_${batch}.pdf`;keyText='\ufeff'+keys;$('dlkey').disabled=false;
   $('dlzip').disabled=false;$('st').textContent=`${n}টি সেট তৈরি হয়েছে (ব্যাচ ${batch})। PDF ডাউনলোড করুন।${PM}`}
