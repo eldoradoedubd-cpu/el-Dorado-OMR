@@ -48,7 +48,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <div id="qinfo" class="mu"></div>
 <button class="s" id="sample">নমুনা ফরম্যাট বসান</button>
 <label>পরীক্ষার নাম</label><input id="ex" placeholder="যেমন: মডেল টেস্ট - ০১">
-<label>কোর্স (এই কোর্সে ভর্তি স্টুডেন্টরাই পোর্টালে ফলাফল দেখবে)</label><select id="cid"><option value="">— কোর্স বাছুন (পোর্টালে লগইন করলে আসবে) —</option></select>
+<label>কোর্স (এই কোর্সে ভর্তি স্টুডেন্টরাই পোর্টালে ফলাফল দেখবে)</label><select id="cid"><option value="">— কোর্স বাছুন (পোর্টালে লগইন করলে আসবে) —</option></select><button class="s" id="crf" type="button">🔄 কোর্স তালিকা রিফ্রেশ</button><small id="cst"></small>
 <div class="row"><div><label>বিষয়</label><input id="sb"></div><div><label>অধ্যায়ের নাম</label><input id="ch"></div></div>
 <div class="row"><div><label>পূর্ণমান</label><select id="fm"></select></div><div><label>সময়</label><select id="tm"></select></div></div>
 <small>প্রতি প্রশ্নের নম্বর = পূর্ণমান ÷ প্রশ্নসংখ্যা (স্ক্যানের সময় স্বয়ংক্রিয়)।</small>
@@ -466,8 +466,19 @@ function pcell(r){const E={no_student:'রেজি. নং পোর্টা�
 function pui(){const on=!!ME;$('pin').style.display=on?'none':'';$('pon').style.display=on?'':'none';if(ME)$('pnm').textContent=`✅ ${ME.name} (${ME.role})`;
  const pr=Object.keys(PEND).length,rr=RES.filter(r=>!r.sy&&/^\d{7}$/.test(r.reg)&&/^\d{6}$/.test(String(r.set))).length;
  $('psy').textContent='এখনই পাঠান'+(pr+rr?` (বাকি: ${bn(pr)} পরীক্ষা, ${bn(rr)} ফলাফল)`:'')}
-async function loadCourses(){const{data}=await sbc.from('docs').select('id,data').eq('coll','courses');const sel=$('cid'),cur=sel.value||CIDP;
- sel.length=1;(data||[]).map(x=>({id:x.id,t:(x.data||{}).title||x.id})).sort((a,b)=>a.t.localeCompare(b.t)).forEach(c=>sel.add(new Option(c.t,c.id)));sel.value=cur}
+let CLOAD=false,CSIG='';
+async function loadCourses(manual){
+ if(!ME||CLOAD)return;CLOAD=true;const sel=$('cid'),btn=$('crf'),st=$('cst');btn&&(btn.disabled=true);manual&&st&&(st.textContent='কোর্স আনা হচ্ছে…');
+ try{
+  let all=[],from=0;
+  for(;;){const{data,error}=await sbc.from('docs').select('id,data').eq('coll','courses').order('id').range(from,from+999);
+   if(error)throw new Error(error.message);all=all.concat(data||[]);if(!data||data.length<1000)break;from+=1000}
+  const L=all.map(x=>{const d=x.data||{};return{id:x.id,t:String(d.title||d.name||d.courseName||d.nameBn||x.id)}}).sort((a,b)=>a.t.localeCompare(b.t));
+  const sig=L.map(c=>c.id+'\u0001'+c.t).join('\u0002');
+  if(sig!==CSIG){const cur=sel.value||CIDP;sel.length=1;L.forEach(c=>sel.add(new Option(c.t,c.id)));sel.value=cur;CSIG=sig}
+  st&&(st.textContent='✅ '+bn(L.length)+'টি কোর্স — '+new Date().toLocaleTimeString('bn-BD'))
+ }catch(e){st&&(st.textContent='⚠️ কোর্স তালিকা আনা যায়নি: '+e.message)}
+ finally{CLOAD=false;btn&&(btn.disabled=false)}}
 async function pinit(){const{data:{session}}=await sbc.auth.getSession();if(!session){ME=null;return pui()}
  const{data:p}=await sbc.from('profiles').select('name,role').eq('id',session.user.id).maybeSingle();
  if(!p||!['admin','teacher','staff'].includes(p.role)){await sbc.auth.signOut();ME=null;pui();return pst('⚠️ এই আইডি দিয়ে লগইন করা যাবে না (শুধু অ্যাডমিন/টিচার/স্টাফ)।')}
@@ -498,5 +509,10 @@ async function flushRes(){if(FB||!ME)return;FB=true;
    else{RES[i].sy=1;RES[i].er='';RES[i].pr=r.reg;RES[i].en=d.enrolled;if(!RES[i].name&&d.name)RES[i].name=d.name;if(last&&last.id==r.id&&!$('stn').value&&d.name)$('stn').value=d.name}}}
  finally{FB=false;saveRes();renderList();pui()}}
 addEventListener('online',()=>{flushPub().then(flushRes).catch(()=>{})});
+$('crf').onclick=()=>loadCourses(true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadCourses()});
+addEventListener('focus',()=>loadCourses());
+addEventListener('online',()=>loadCourses());
+setInterval(()=>{if(!document.hidden)loadCourses()},60000);
 pui();pinit().catch(()=>{});
 </script><script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
