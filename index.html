@@ -48,7 +48,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <div id="qinfo" class="mu"></div>
 <button class="s" id="sample">নমুনা ফরম্যাট বসান</button>
 <label>পরীক্ষার নাম</label><input id="ex" placeholder="যেমন: মডেল টেস্ট - ০১">
-<label>কোর্স (এই কোর্সে ভর্তি স্টুডেন্টরাই পোর্টালে ফলাফল দেখবে)</label><select id="cid"><option value="">— কোর্স বাছুন (পোর্টালে লগইন করলে আসবে) —</option></select><button class="s" id="crf" type="button">🔄 কোর্স তালিকা রিফ্রেশ</button><small id="cst"></small>
+<label>কোর্স (এই কোর্সে ভর্তি স্টুডেন্টরাই পোর্টালে ফলাফল দেখবে)</label><select id="cid"><option value="">— কোর্স বাছুন (পোর্টালে লগইন করলে আসবে) —</option></select><button class="s" id="crf" type="button">🔄 কোর্স তালিকা রিফ্রেশ</button><small id="cst"></small><label>পোর্টালে কোন পরীক্ষা হিসেবে যাবে?</label><select id="eidsel"><option value="">স্বয়ংক্রিয় (একই প্রশ্ন হলে আগের পরীক্ষাতেই যোগ হবে)</option><option value="new">🆕 সবসময় নতুন পরীক্ষা</option></select><small>আগের কোনো পরীক্ষা বাছলে নতুন সেটগুলো ওই পরীক্ষাতেই যোগ হবে, আর স্ক্যান করলে একই পরীক্ষার ফলাফল হিসেবে গণ্য হবে। আগে কোর্স বাছুন।</small>
 <div class="row"><div><label>বিষয়</label><input id="sb"></div><div><label>অধ্যায়ের নাম</label><input id="ch"></div></div>
 <div class="row"><div><label>পূর্ণমান</label><select id="fm"></select></div><div><label>সময়</label><select id="tm"></select></div></div>
 <small>প্রতি প্রশ্নের নম্বর = পূর্ণমান ÷ প্রশ্নসংখ্যা (স্ক্যানের সময় স্বয়ংক্রিয়)।</small>
@@ -195,7 +195,7 @@ $('gen').onclick=async()=>{
  if(!Q.length)return $('st').textContent='আগে প্রশ্ন পেস্ট করুন।';
  if(Q.length>100)return $('st').textContent='প্রশ্ন ১০০টির বেশি হতে পারবে না।';
  $('gen').disabled=true;await document.fonts.load('14px "Noto Sans Bengali"');await loadFont($('fnt').value);
- const n=Math.min(200,Math.max(1,+$('cnt').value|0)),meta=getMeta(),made=[],batch=Math.random().toString(36).slice(2,6).toUpperCase(),doc=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});try{localStorage.setItem('omrmeta',JSON.stringify(meta))}catch(e){}if(meta.cid)meta.eid='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);PM='';try{await takenCodes()}catch(e){}let keys='সেট,উত্তরমালা (ক=1 খ=2 গ=3 ঘ=4)\n';
+ const n=Math.min(200,Math.max(1,+$('cnt').value|0)),meta=getMeta(),made=[],batch=Math.random().toString(36).slice(2,6).toUpperCase(),doc=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'landscape'});try{localStorage.setItem('omrmeta',JSON.stringify(meta))}catch(e){}if(meta.cid&&!resolveEx(meta)){$('gen').disabled=false;$('st').textContent='বাতিল করা হয়েছে।';return}PM='';try{await takenCodes()}catch(e){}let keys='সেট,উত্তরমালা (ক=1 খ=2 গ=3 ঘ=4)\n';
  try{for(let i=0;i<n;i++){$('st').textContent=`তৈরি হচ্ছে… ${i+1}/${n}`;await tick();
   const s=mk(newCode(),meta);SETS[s.code]={qs:s.qs,meta,lay:3};made.push(s.code);
   const pgs=paperPages(s);if(pgs.length%2){const b=document.createElement('div');b.className='pg';b.innerHTML='<div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:10px;color:#aaa">এই পৃষ্ঠা ইচ্ছাকৃতভাবে ফাঁকা</div>';$('stage').appendChild(b);pgs.push(b)}
@@ -223,7 +223,7 @@ $('hl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.u){const h=HIST.find(x=>x.id==b.dataset.u);if(!h)return;const m=h.meta||{};
   Q=h.qs.map(q=>({t:q.t,o:q.o.slice(),a:q.a}));
   $('qt').value=Q.map(q=>`${q.t}\n${q.o.map((o,j)=>L[j]+') '+o).join('\n')}\nউত্তর: ${L[q.a]}`).join('\n\n');
-  $('ex').value=m.ex||'';$('sb').value=m.sb||'';$('ch').value=m.ch||'';m.cid&&($('cid').value=m.cid);
+  $('ex').value=m.ex||'';$('sb').value=m.sb||'';$('ch').value=m.ch||'';m.cid&&($('cid').value=m.cid);loadExams();
   m.fm&&($('fm').value=m.fm);m.tm&&($('tm').value=m.tm);m.cols&&($('qc').value=m.cols);m.cols2&&($('qc2').value=m.cols2);$('ngp').value=m.neg||'';
   m.font&&FONTS[m.font]&&($('fnt').value=m.font);m.fs!==undefined&&($('fsz').value=m.fs);$('fsz').onchange();$('fnt').onchange();
   $('qinfo').textContent=`${Q.length}টি প্রশ্ন পাওয়া গেছে`;$('st').textContent='প্রশ্নগুলো বসানো হয়েছে। সেট সংখ্যা ঠিক করে "প্রশ্নপত্র তৈরি করুন" চাপুন।';
@@ -466,6 +466,25 @@ function pcell(r){const E={no_student:'রেজি. নং পোর্টা�
 function pui(){const on=!!ME;$('pin').style.display=on?'none':'';$('pon').style.display=on?'':'none';if(ME)$('pnm').textContent=`✅ ${ME.name} (${ME.role})`;
  const pr=Object.keys(PEND).length,rr=RES.filter(r=>!r.sy&&/^\d{7}$/.test(r.reg)&&/^\d{6}$/.test(String(r.set))).length;
  $('psy').textContent='এখনই পাঠান'+(pr+rr?` (বাকি: ${bn(pr)} পরীক্ষা, ${bn(rr)} ফলাফল)`:'')}
+const EXR=(()=>{try{return JSON.parse(localStorage.getItem('omrex')||'{}')}catch(e){return{}}})();
+const saveEXR=()=>{try{localStorage.setItem('omrex',JSON.stringify(EXR))}catch(e){}};
+const curK=()=>hk(Q.map(q=>({t:q.t,o:q.o,a:q.a})));
+let EXL=[];
+async function loadExams(){const cid=$('cid').value,sel=$('eidsel');if(!sel)return;const cur=sel.value;
+ let L=Object.entries(EXR).filter(([i,e])=>e.cid===cid).map(([i,e])=>({id:i,t:e.t,k:e.k,ts:e.ts||0}));
+ if(cid&&ME){try{const{data,error}=await sbc.from('docs').select('id,data').eq('coll','exams').eq('data->>cid',cid);
+  if(!error)(data||[]).forEach(x=>{const d=x.data||{};if(L.some(l=>l.id===x.id))return;L.push({id:x.id,t:String(d.title||x.id),k:Array.isArray(d.qs)&&d.qs.length?hk(d.qs.map(q=>({t:q.q,o:q.o,a:q.a}))):'',ts:0})})}catch(e){}}
+ if($('cid').value!==cid)return;L.sort((a,b)=>b.ts-a.ts);EXL=L;
+ sel.length=2;L.forEach(e=>sel.add(new Option(e.t+(e.ts?' ('+new Date(e.ts).toLocaleDateString('bn-BD')+')':''),e.id)));
+ sel.value=[...sel.options].some(o=>o.value===cur)?cur:''}
+function resolveEx(meta){const v=$('eidsel').value,k=curK();let eid='',title='';
+ if(v&&v!=='new'){const e=EXL.find(x=>x.id===v)||{};
+  if(e.k&&e.k!==k){if(!confirm('এই প্রশ্নগুলো বাছাই করা পরীক্ষার প্রশ্নের সাথে মেলে না। তবুও ওই পরীক্ষায় যোগ করবেন? (পরীক্ষার প্রশ্ন বদলে যাবে)'))return false}
+  else if(!e.k){if(!confirm('বাছাই করা পরীক্ষার প্রশ্ন যাচাই করা যায়নি। নিশ্চিত যে প্রশ্ন একই? তাহলে OK চাপুন।'))return false}
+  eid=v;title=e.t||''}
+ else if(!v){const f=Object.entries(EXR).find(([i,e])=>e.cid===meta.cid&&e.k===k);if(f){eid=f[0];title=f[1].t}}
+ if(!eid)eid='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+ meta.eid=eid;meta.etitle=title;return true}
 let CLOAD=false,CSIG='';
 async function loadCourses(manual){
  if(!ME||CLOAD)return;CLOAD=true;const sel=$('cid'),btn=$('crf'),st=$('cst');btn&&(btn.disabled=true);manual&&st&&(st.textContent='কোর্স আনা হচ্ছে…');
@@ -476,7 +495,7 @@ async function loadCourses(manual){
   const L=all.map(x=>{const d=x.data||{};return{id:x.id,t:String(d.title||d.name||d.courseName||d.nameBn||x.id)}}).sort((a,b)=>a.t.localeCompare(b.t));
   const sig=L.map(c=>c.id+'\u0001'+c.t).join('\u0002');
   if(sig!==CSIG){const cur=sel.value||CIDP;sel.length=1;L.forEach(c=>sel.add(new Option(c.t,c.id)));sel.value=cur;CSIG=sig}
-  st&&(st.textContent='✅ '+bn(L.length)+'টি কোর্স — '+new Date().toLocaleTimeString('bn-BD'))
+  loadExams();st&&(st.textContent='✅ '+bn(L.length)+'টি কোর্স — '+new Date().toLocaleTimeString('bn-BD'))
  }catch(e){st&&(st.textContent='⚠️ কোর্স তালিকা আনা যায়নি: '+e.message)}
  finally{CLOAD=false;btn&&(btn.disabled=false)}}
 async function pinit(){const{data:{session}}=await sbc.auth.getSession();if(!session){ME=null;return pui()}
@@ -497,9 +516,10 @@ async function flushPub(){if(!ME)return;
    p.codes=p.codes.slice(15);savePend()}
   delete PEND[eid];savePend()}}
 async function pubAfterGen(meta,made){if(!meta.cid)return PM=' (কোর্স বাছা হয়নি, তাই পোর্টালে যায়নি)';
- PEND[meta.eid]={ex:{id:meta.eid,cid:meta.cid,title:meta.ex||meta.sb||'OMR পরীক্ষা',meta:{fm:meta.fm,tm:meta.tm,sb:meta.sb,ch:meta.ch,n:Q.length,mk:+(meta.fm/Q.length).toFixed(4)},qs:Q.map(q=>({q:q.t,o:q.o,a:q.a}))},codes:made};savePend();
+ const ttl=meta.etitle||meta.ex||meta.sb||'OMR পরীক্ষা';EXR[meta.eid]={cid:meta.cid,t:ttl,k:curK(),ts:Date.now()};saveEXR();
+ const oldP=PEND[meta.eid];PEND[meta.eid]={ex:{id:meta.eid,cid:meta.cid,title:ttl,meta:{fm:meta.fm,tm:meta.tm,sb:meta.sb,ch:meta.ch,n:Q.length,mk:+(meta.fm/Q.length).toFixed(4)},qs:Q.map(q=>({q:q.t,o:q.o,a:q.a}))},codes:(oldP?oldP.codes:[]).concat(made)};savePend();
  if(!ME){pui();return PM=' ⚠️ পোর্টালে লগইন নেই — লগইন করলে নিজে থেকে প্রকাশ হবে।'}
- try{await flushPub();PM=` ✅ পোর্টালে "${meta.cn}" কোর্সে সেভ হয়েছে।`}catch(e){PM=' ⚠️ '+e.message+' ("এখনই পাঠান" চাপুন)'}pui()}
+ try{await flushPub();PM=` ✅ পোর্টালে "${meta.cn}" কোর্সে "${ttl}" পরীক্ষায় সেভ হয়েছে।`}catch(e){PM=' ⚠️ '+e.message+' ("এখনই পাঠান" চাপুন)'}pui();loadExams()}
 function queueRes(){clearTimeout(RT);RT=setTimeout(()=>flushRes().catch(()=>{}),1500);pui()}
 async function flushRes(){if(FB||!ME)return;FB=true;
  try{for(const r of RES.slice()){if(r.sy||!/^\d{7}$/.test(r.reg)||!/^\d{6}$/.test(String(r.set)))continue;
@@ -509,7 +529,7 @@ async function flushRes(){if(FB||!ME)return;FB=true;
    else{RES[i].sy=1;RES[i].er='';RES[i].pr=r.reg;RES[i].en=d.enrolled;if(!RES[i].name&&d.name)RES[i].name=d.name;if(last&&last.id==r.id&&!$('stn').value&&d.name)$('stn').value=d.name}}}
  finally{FB=false;saveRes();renderList();pui()}}
 addEventListener('online',()=>{flushPub().then(flushRes).catch(()=>{})});
-$('crf').onclick=()=>loadCourses(true);
+$('crf').onclick=()=>loadCourses(true);$('cid').addEventListener('change',()=>{$('eidsel').value='';loadExams()});loadExams();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadCourses()});
 addEventListener('focus',()=>loadCourses());
 addEventListener('online',()=>loadCourses());
