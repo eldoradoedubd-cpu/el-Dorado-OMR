@@ -33,6 +33,11 @@ small,.mu{color:var(--mu);font-size:13px}
 .bb{position:absolute;width:13px;height:13px;border:1.1px solid #000;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:400 7.5px/1 'Noto Sans Bengali',sans-serif;color:#b4b4b4}
 .lb{position:absolute;font:700 13px 'Noto Sans Bengali',sans-serif;width:18px;text-align:center}
 .qr{position:absolute;width:130px;height:130px;image-rendering:pixelated}
+#ansl{max-height:60vh;overflow:auto;margin-top:6px}
+.ar{border:1px solid var(--bd);border-radius:8px;padding:8px;margin:6px 0}
+.ar .qq{font-size:14px;margin-bottom:4px}
+.ar button.o{display:block;width:100%;text-align:left;margin:3px 0 0;padding:7px 9px;background:transparent;color:var(--tx);border:1px solid var(--bd);font-size:14px}
+.ar button.o.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 </style></head><body><main>
 <h1>MCQ প্রশ্নপত্র ও OMR টুল</h1>
 
@@ -45,7 +50,7 @@ small,.mu{color:var(--mu);font-size:13px}
 <div class="c"><h2>১. প্রশ্ন পেস্ট করুন</h2>
 <small>প্রতিটি প্রশ্ন এই ফরম্যাটে লিখে/কপি করে নিচে পেস্ট করুন: প্রশ্ন, তারপর আলাদা লাইনে ক) খ) গ) ঘ), শেষে "উত্তর: ক"। Excel/Google Sheet থেকে ৬ কলাম (প্রশ্ন, ক, খ, গ, ঘ, উত্তর) কপি করেও পেস্ট করা যায়। AI কে এই ফরম্যাটে প্রশ্ন বানাতে বললেই হবে। সর্বোচ্চ ১০০টি।</small>
 <textarea id="qt" rows="10" placeholder="এখানে পেস্ট করুন…"></textarea>
-<div id="qinfo" class="mu"></div>
+<div id="qinfo" class="mu"></div><details id="ansd" style="display:none;margin-top:6px"><summary>✏️ উত্তর যাচাই ও সংশোধন করুন (ভুল উত্তর ঠিক করতে এখানে চাপুন)</summary><small>যে প্রশ্নের উত্তর ভুল, সঠিক অপশনে চাপ দিন। সবুজ/নীল করা অপশনটাই বর্তমান উত্তর। পরিবর্তন সাথে সাথে উপরের লেখাতেও বসে যাবে।</small><div id="ansl"></div></details>
 <button class="s" id="sample">নমুনা ফরম্যাট বসান</button>
 <label>পরীক্ষার নাম</label><input id="ex" placeholder="যেমন: মডেল টেস্ট - ০১">
 <label>কোর্স (এই কোর্সে ভর্তি স্টুডেন্টরাই পোর্টালে ফলাফল দেখবে)</label><select id="cid"><option value="">— কোর্স বাছুন (পোর্টালে লগইন করলে আসবে) —</option></select><button class="s" id="crf" type="button">🔄 কোর্স তালিকা রিফ্রেশ</button><small id="cst"></small><label>পোর্টালে কোন পরীক্ষা হিসেবে যাবে?</label><select id="eidsel"><option value="">স্বয়ংক্রিয় (একই প্রশ্ন হলে আগের পরীক্ষাতেই যোগ হবে)</option><option value="new">🆕 সবসময় নতুন পরীক্ষা</option></select><small>আগের কোনো পরীক্ষা বাছলে নতুন সেটগুলো ওই পরীক্ষাতেই যোগ হবে, আর স্ক্যান করলে একই পরীক্ষার ফলাফল হিসেবে গণ্য হবে। আগে কোর্স বাছুন।</small>
@@ -141,6 +146,13 @@ function parseQ(t){const out=[];t=t.replace(/\r/g,'');
   if(cur.last!==undefined)cur.o[cur.last]+=' '+l;else cur.t+=(cur.t?' ':'')+l.replace(/^[\d০-৯]+\s*[.)।]\s*/,'')}
  return out}
 $('qt').oninput=()=>{const v=$('qt').value.trim();Q=v?parseQ(v):[];$('qinfo').textContent=v?(Q.length?`${Q.length}টি প্রশ্ন পাওয়া গেছে`+(Q.length>100?' — সর্বোচ্চ ১০০টি অনুমোদিত':''):'কোনো প্রশ্ন পাওয়া যায়নি, ফরম্যাট মিলিয়ে দেখুন'):''};
+const AL=['ক','খ','গ','ঘ'];
+function renderAns(){const d=$('ansd'),b=$('ansl');if(!d)return;d.style.display=Q.length?'':'none';
+ b.innerHTML=Q.map((q,i)=>`<div class="ar" data-i="${i}"><div class="qq"><b>${bn(i+1)}.</b> ${esc(q.t)}</div>`+q.o.map((o,j)=>`<button type="button" class="o${q.a===j?' on':''}" data-j="${j}">${AL[j]}) ${esc(o)}${q.a===j?' ✔':''}</button>`).join('')+'</div>').join('')}
+$('ansl').onclick=e=>{const bt=e.target.closest('button.o');if(!bt)return;const r=bt.closest('.ar'),i=+r.dataset.i,j=+bt.dataset.j;if(!Q[i])return;
+ Q[i].a=j;[...r.querySelectorAll('button.o')].forEach((x,k)=>{x.classList.toggle('on',k===j);x.textContent=x.textContent.replace(/ ✔$/,'')+(k===j?' ✔':'')});
+ $('qt').value=Q.map(q=>`${q.t}\n${q.o.map((o,k)=>AL[k]+') '+o).join('\n')}\nউত্তর: ${AL[q.a]}`).join('\n\n');$('st').textContent=`প্রশ্ন ${bn(i+1)}-এর উত্তর "${AL[j]}" করা হয়েছে।`};
+{const _oi=$('qt').oninput;$('qt').oninput=()=>{_oi();renderAns()}}
 $('sample').onclick=()=>{$('qt').value=SAMPLE;$('qt').oninput()};
 /* ===== OMR জ্যামিতি: লে-আউট ২ (নতুন, বড় ও ফাঁকা) ও ১ (পুরনো ছাপা শিটের জন্য) ===== */
 const QX=456,QW=634;
@@ -226,7 +238,7 @@ $('hl').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
   $('ex').value=m.ex||'';$('sb').value=m.sb||'';$('ch').value=m.ch||'';m.cid&&($('cid').value=m.cid);loadExams();
   m.fm&&($('fm').value=m.fm);m.tm&&($('tm').value=m.tm);m.cols&&($('qc').value=m.cols);m.cols2&&($('qc2').value=m.cols2);$('ngp').value=m.neg||'';
   m.font&&FONTS[m.font]&&($('fnt').value=m.font);m.fs!==undefined&&($('fsz').value=m.fs);$('fsz').onchange();$('fnt').onchange();
-  $('qinfo').textContent=`${Q.length}টি প্রশ্ন পাওয়া গেছে`;$('st').textContent='প্রশ্নগুলো বসানো হয়েছে। সেট সংখ্যা ঠিক করে "প্রশ্নপত্র তৈরি করুন" চাপুন।';
+  renderAns();$('qinfo').textContent=`${Q.length}টি প্রশ্ন পাওয়া গেছে`;$('st').textContent='প্রশ্নগুলো বসানো হয়েছে। সেট সংখ্যা ঠিক করে "প্রশ্নপত্র তৈরি করুন" চাপুন।';
   $('cnt').scrollIntoView({behavior:'smooth',block:'center'})}};
 renderHist();
 
